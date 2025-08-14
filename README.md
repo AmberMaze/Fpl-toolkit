@@ -6,6 +6,7 @@ A comprehensive Fantasy Premier League (FPL) analysis and decision support toolk
 
 - 🤖 **AI-Powered Advisor**: Intelligent team analysis and transfer recommendations
 - 📊 **Advanced Analytics**: Fixture difficulty, player projections, and performance metrics
+- 📈 **Advanced Metrics**: Expected goals (xG/xA) and zone weakness adjustments for enhanced projections
 - 📱 **Mobile-Friendly API**: RESTful endpoints optimized for mobile access
 - 🗄️ **Database Integration**: SQLite fallback with optional PostgreSQL support
 - 🌐 **Web Interface**: Streamlit app with responsive design
@@ -270,6 +271,30 @@ The toolkit implements respectful rate limiting:
 - **Automatic caching** of FPL API responses (1 hour default)
 - **Request throttling** to avoid overwhelming FPL servers
 - **Configurable cache TTL** via environment variables
+
+### Advanced Metrics Configuration
+
+The toolkit supports enhanced projections using advanced metrics:
+
+```bash
+# Enable/disable advanced metrics
+ENABLE_ADVANCED_METRICS=true
+ENABLE_ZONE_WEAKNESS=true
+
+# Data file paths (sample data included)
+XGXA_DATA_FILE=data/xgxa_sample.json
+ZONE_WEAKNESS_DATA_FILE=data/zone_weakness_sample.json
+
+# Fallback behavior when data unavailable
+ADVANCED_METRICS_FALLBACK=sample_data
+```
+
+**Advanced Metrics Features:**
+- **xG/xA Integration**: Expected goals and assists data enhances projection accuracy
+- **Zone Weakness Analysis**: Team-specific defensive vulnerabilities by attack zone
+- **Position-Based Adjustments**: Different attack patterns for forwards, midfielders, defenders
+- **Sample Data Included**: Development-ready with realistic sample datasets
+- **Graceful Fallback**: Works seamlessly when advanced data is unavailable
 
 ## Deployment
 

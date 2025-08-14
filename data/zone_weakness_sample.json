@@ -1,0 +1,197 @@
+{
+  "description": "Zone weakness adjustments for team defensive vulnerabilities by attack zone",
+  "data_source": "Tactical analysis and statistical modeling",
+  "last_updated": "2024-08-14",
+  "gameweek": 1,
+  "teams": [
+    {
+      "team_id": 1,
+      "team_name": "Arsenal",
+      "zone_weaknesses": {
+        "left_wing": 0.95,
+        "right_wing": 1.08,
+        "central": 0.92,
+        "box_left": 1.02,
+        "box_right": 0.88,
+        "box_central": 0.90,
+        "set_pieces": 1.15,
+        "counter_attacks": 0.85
+      },
+      "defensive_style": "high_line",
+      "vulnerability_rating": 2.3
+    },
+    {
+      "team_id": 2,
+      "team_name": "Manchester City",
+      "zone_weaknesses": {
+        "left_wing": 0.88,
+        "right_wing": 0.91,
+        "central": 0.82,
+        "box_left": 0.85,
+        "box_right": 0.87,
+        "box_central": 0.79,
+        "set_pieces": 0.95,
+        "counter_attacks": 1.25
+      },
+      "defensive_style": "possession_based",
+      "vulnerability_rating": 1.8
+    },
+    {
+      "team_id": 3,
+      "team_name": "Liverpool",
+      "zone_weaknesses": {
+        "left_wing": 0.92,
+        "right_wing": 0.89,
+        "central": 0.94,
+        "box_left": 0.91,
+        "box_right": 0.93,
+        "box_central": 0.88,
+        "set_pieces": 1.05,
+        "counter_attacks": 1.12
+      },
+      "defensive_style": "pressing",
+      "vulnerability_rating": 2.1
+    },
+    {
+      "team_id": 4,
+      "team_name": "Chelsea",
+      "zone_weaknesses": {
+        "left_wing": 1.08,
+        "right_wing": 1.12,
+        "central": 1.05,
+        "box_left": 1.10,
+        "box_right": 1.15,
+        "box_central": 1.08,
+        "set_pieces": 1.25,
+        "counter_attacks": 0.98
+      },
+      "defensive_style": "transitional",
+      "vulnerability_rating": 3.2
+    },
+    {
+      "team_id": 5,
+      "team_name": "Tottenham",
+      "zone_weaknesses": {
+        "left_wing": 1.15,
+        "right_wing": 0.98,
+        "central": 1.22,
+        "box_left": 1.18,
+        "box_right": 1.02,
+        "box_central": 1.25,
+        "set_pieces": 1.35,
+        "counter_attacks": 0.95
+      },
+      "defensive_style": "counter_attacking",
+      "vulnerability_rating": 3.5
+    },
+    {
+      "team_id": 6,
+      "team_name": "Manchester United",
+      "zone_weaknesses": {
+        "left_wing": 1.05,
+        "right_wing": 1.18,
+        "central": 1.12,
+        "box_left": 1.08,
+        "box_right": 1.22,
+        "box_central": 1.15,
+        "set_pieces": 1.20,
+        "counter_attacks": 1.08
+      },
+      "defensive_style": "balanced",
+      "vulnerability_rating": 2.9
+    },
+    {
+      "team_id": 7,
+      "team_name": "Newcastle",
+      "zone_weaknesses": {
+        "left_wing": 0.95,
+        "right_wing": 0.92,
+        "central": 0.88,
+        "box_left": 0.90,
+        "box_right": 0.93,
+        "box_central": 0.85,
+        "set_pieces": 0.98,
+        "counter_attacks": 1.15
+      },
+      "defensive_style": "compact",
+      "vulnerability_rating": 2.0
+    },
+    {
+      "team_id": 8,
+      "team_name": "Brighton",
+      "zone_weaknesses": {
+        "left_wing": 1.02,
+        "right_wing": 1.08,
+        "central": 0.98,
+        "box_left": 1.05,
+        "box_right": 1.12,
+        "box_central": 1.02,
+        "set_pieces": 1.18,
+        "counter_attacks": 1.05
+      },
+      "defensive_style": "possession_based",
+      "vulnerability_rating": 2.6
+    },
+    {
+      "team_id": 9,
+      "team_name": "West Ham",
+      "zone_weaknesses": {
+        "left_wing": 1.22,
+        "right_wing": 1.18,
+        "central": 1.15,
+        "box_left": 1.25,
+        "box_right": 1.20,
+        "box_central": 1.18,
+        "set_pieces": 1.30,
+        "counter_attacks": 1.22
+      },
+      "defensive_style": "defensive",
+      "vulnerability_rating": 3.8
+    },
+    {
+      "team_id": 10,
+      "team_name": "Aston Villa",
+      "zone_weaknesses": {
+        "left_wing": 1.08,
+        "right_wing": 1.05,
+        "central": 1.12,
+        "box_left": 1.10,
+        "box_right": 1.08,
+        "box_central": 1.15,
+        "set_pieces": 1.22,
+        "counter_attacks": 1.02
+      },
+      "defensive_style": "balanced",
+      "vulnerability_rating": 2.8
+    }
+  ],
+  "multiplier_explanations": {
+    "description": "Zone weakness multipliers applied to attacking player projections",
+    "scale": "1.0 = average defensive strength, >1.0 = weaker (easier to score), <1.0 = stronger (harder to score)",
+    "zones": {
+      "left_wing": "Attacks down the left flank",
+      "right_wing": "Attacks down the right flank", 
+      "central": "Central attacking plays through the middle",
+      "box_left": "Attacking threat in left side of penalty box",
+      "box_right": "Attacking threat in right side of penalty box",
+      "box_central": "Central penalty box finishing opportunities",
+      "set_pieces": "Corners, free kicks, and set piece situations",
+      "counter_attacks": "Fast transition and counter-attacking situations"
+    }
+  },
+  "usage_guidelines": {
+    "implementation": [
+      "Apply zone-specific multipliers to player projections based on their attack patterns",
+      "Consider player position and team tactics when selecting relevant zones",
+      "Update multipliers based on recent defensive performances and tactical changes",
+      "Use as adjustment factor in projection calculations, not standalone predictor"
+    ],
+    "position_mapping": {
+      "forwards": ["box_left", "box_right", "box_central", "set_pieces"],
+      "attacking_midfielders": ["central", "left_wing", "right_wing", "set_pieces"],
+      "wide_midfielders": ["left_wing", "right_wing", "counter_attacks"],
+      "fullbacks": ["left_wing", "right_wing", "set_pieces"],
+      "center_backs": ["set_pieces"]
+    }
+  }
+}
