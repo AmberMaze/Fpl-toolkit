@@ -307,7 +307,7 @@ def enhance_breakdown_with_advanced_metrics(
 
 
 # Simple event breakdown function for demonstration
-def _simple_event_breakdown(player_data: Dict[str, Any], minutes: int = 90) -> Dict[str, float]:
+def _simple_event_breakdown(projected_points: float, player_data: Dict[str, Any], minutes: int = 90) -> Dict[str, float]:
     """Create a simple event breakdown based on player's season stats.
     
     This is a basic implementation for demonstration. In practice, this would
