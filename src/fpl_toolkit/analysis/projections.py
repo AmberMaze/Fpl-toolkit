@@ -2,6 +2,7 @@
 from typing import List, Dict, Any, Optional
 from ..api.client import FPLClient
 from .fixtures import compute_fixture_difficulty
+from .advanced_metrics import default_metrics_engine
 
 
 def calculate_player_projection(player_id: int, gameweek: int, client: Optional[FPLClient] = None) -> Dict[str, Any]:
@@ -89,6 +90,27 @@ def calculate_player_projection(player_id: int, gameweek: int, client: Optional[
         # Calculate final projection
         projected_points = base_projection * fixture_multiplier
         
+        # Apply advanced metrics enhancements
+        position_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
+        player_position = position_map.get(position, "MID")
+        opponent_id = fixture_data["fixtures"][0].get("opponent_id") if fixture_data and fixture_data["fixtures"] else None
+        
+        # Get enhanced projection with xG/xA and zone weakness
+        if default_metrics_engine.is_data_available()["xgxa_available"] or default_metrics_engine.is_data_available()["zone_weakness_available"]:
+            enhanced = default_metrics_engine.get_enhanced_projection(
+                player_id=player_id,
+                base_projection=projected_points,
+                opponent_team_id=opponent_id,
+                player_position=player_position,
+                minutes_played=int(avg_minutes),
+                attack_style="balanced"
+            )
+            projected_points = enhanced["final_projection"]
+            # Store enhancement data for later use
+            enhancement_data = enhanced
+        else:
+            enhancement_data = {"base_projection": projected_points, "final_projection": projected_points}
+        
         # Adjust for player status
         status = player_data.get("status", "a")
         chance_of_playing = player_data.get("chance_of_playing_this_round")
@@ -130,7 +152,10 @@ def calculate_player_projection(player_id: int, gameweek: int, client: Optional[
             "home_advantage": fixture_data["fixtures"][0].get("is_home", False) if fixture_data and fixture_data["fixtures"] else False,
             "opponent_team_id": fixture_data["fixtures"][0].get("opponent_id") if fixture_data and fixture_data["fixtures"] else None,
             "status": status,
-            "chance_of_playing": chance_of_playing
+            "chance_of_playing": chance_of_playing,
+            # Advanced metrics data
+            "advanced_metrics": enhancement_data,
+            "has_advanced_metrics": default_metrics_engine.is_data_available()
         }
     
     finally:
