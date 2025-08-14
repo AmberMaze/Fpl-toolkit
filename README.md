@@ -147,6 +147,136 @@ uvicorn fpl_toolkit.service.api:app --host 0.0.0.0 --port 8000
 - `GET /projections/{id}` - Player projections
 - `POST /transfer-scenario` - Analyze transfers
 - `GET /fixtures/{team_id}` - Fixture difficulty
+- `GET /team/{team_id}/summary` - Team summary with captain names and enhanced breakdowns
+
+## Advanced Metrics & Zone Adjustments
+
+The toolkit supports optional advanced metrics to enhance player projections and breakdowns:
+
+### Expected Goals (xG) and Assists (xA)
+
+The system can integrate expected performance metrics to provide more accurate breakdowns:
+
+```bash
+# Enable external metrics (requires network access)
+export ENABLE_UNDERSTAT=1
+
+# Use local sample data (default)
+export ENABLE_UNDERSTAT=0
+```
+
+When enabled, the system will:
+- Fetch real-time xG/xA data from external sources
+- Reweight goal vs assist projections based on underlying performance
+- Provide more accurate attacking returns estimation
+
+**Fallback Strategy**: If external data is unavailable, the system gracefully falls back to local sample data or heuristic calculations.
+
+### Zone Weakness Adjustments
+
+Historical zone weakness data can be used to adjust attacking projections:
+
+```bash
+# Custom zone weakness file
+export ZONE_WEAKNESS_FILE=./data/custom_zone_weakness.json
+
+# Use default sample (fallback if file missing)
+export ZONE_WEAKNESS_FILE=./data/zone_weakness.sample.json
+```
+
+Zone adjustments consider:
+- **Left/Center/Right attacking patterns**: Players attacking different zones face varying defensive strengths
+- **Team-specific weaknesses**: Some teams concede more from specific areas
+- **Multiplier application**: Attacking returns are adjusted by zone-specific multipliers
+
+### Enhanced Team Breakdowns
+
+The `/team/{team_id}/summary` endpoint provides enhanced player breakdowns:
+
+```json
+{
+  "captain_name": "Erling Haaland",
+  "vice_captain_name": "Mohamed Salah",
+  "players": [
+    {
+      "name": "Erling Haaland",
+      "breakdown": {
+        "appearance": 1.9,
+        "goals": 3.1,
+        "assists": 1.2,
+        "cs": 0.2,
+        "bonus": 0.7,
+        "misc": 0.5,
+        "total": 7.6,
+        "adjustments": {
+          "xg_per90": 0.58,
+          "xa_per90": 0.32,
+          "zone_multiplier": 1.08
+        }
+      }
+    }
+  ]
+}
+```
+
+### Sample Data Files
+
+The toolkit includes sample data for development and fallback:
+
+- `data/xgxa_sample.json`: Expected goals/assists for popular players
+- `data/zone_weakness.sample.json`: Zone weakness indices for all Premier League teams
+
+### Configuration Options
+
+```bash
+# Advanced metrics configuration
+ENABLE_UNDERSTAT=1                              # Enable real-time xG/xA (default: 0)
+ZONE_WEAKNESS_FILE=./data/zone_weakness.json    # Zone weakness data file
+```
+
+**Note**: When advanced metrics are unavailable, all functionality continues to work with graceful fallbacks.
+
+## Official FPL API Usage
+
+This toolkit respectfully uses the official Fantasy Premier League API endpoints:
+
+### Primary Endpoints Used
+
+- **https://fantasy.premierleague.com/api/bootstrap-static/**: Static game data (players, teams, gameweeks)
+- **https://fantasy.premierleague.com/api/element-summary/{element_id}/**: Detailed player information and fixtures
+- **https://fantasy.premierleague.com/api/fixtures/**: Match fixtures and results
+- **https://fantasy.premierleague.com/api/event-status/**: Current gameweek status
+- **https://fantasy.premierleague.com/api/entry/{team_id}/event/{gw}/picks/**: User team selections
+- **https://fantasy.premierleague.com/api/entry/{team_id}/transfers/**: User transfer history
+
+### Data Refresh Cadence
+
+- **Static Data**: Cached for 1 hour (configurable via `CACHE_TTL_SECONDS`)
+- **Live Data**: Cached for 15 minutes during active gameweeks
+- **Player Details**: Cached for 30 minutes
+- **User Teams**: Cached for 5 minutes
+
+### Rate Limiting & Ethics
+
+- **Automatic throttling**: Maximum 60 requests per minute (configurable)
+- **Respectful caching**: Minimizes API calls through intelligent caching
+- **Error handling**: Graceful degradation when API is unavailable
+- **No scraping**: Only uses official API endpoints
+
+### Limitations
+
+- **Public API**: Subject to change without notice
+- **Rate limits**: May be throttled during high traffic periods
+- **Data accuracy**: Dependent on official FPL data updates
+- **Availability**: Service may be unavailable during maintenance
+
+### Safe Usage Guidelines
+
+1. **Use caching**: Don't disable the built-in caching mechanisms
+2. **Respect limits**: Don't modify rate limiting configurations aggressively
+3. **Handle errors**: Implement proper error handling for API failures
+4. **Monitor usage**: Be aware of your request patterns
+5. **Test responsibly**: Use sample data for development when possible
 
 ### Example Requests
 

@@ -8,6 +8,7 @@ from ..ai.advisor import FPLAdvisor
 from ..analysis.projections import calculate_horizon_projection, compare_player_projections
 from ..analysis.decisions import analyze_transfer_scenario, find_transfer_targets
 from ..analysis.fixtures import compute_fixture_difficulty
+from ..analysis.advanced_metrics import enhance_breakdown_with_advanced_metrics, _simple_event_breakdown
 
 
 # Pydantic models for request/response
@@ -99,7 +100,8 @@ async def root():
             "advisor": "/advisor",
             "projections": "/projections/{id}",
             "transfer_scenario": "/transfer-scenario",
-            "fixture_difficulty": "/fixtures/{team_id}"
+            "fixture_difficulty": "/fixtures/{team_id}",
+            "team_summary": "/team/{team_id}/summary"
         }
     }
 
@@ -392,6 +394,123 @@ async def get_transfer_targets(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error finding transfer targets: {str(e)}")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)week (default: current gameweek)"),
+    client: FPLClient = Depends(get_fpl_client)
+):
+    """Get team summary with captain/vice captain names and enhanced breakdowns."""
+    try:
+        # Get team information
+        team_info = client.get_user_team(team_id)
+        
+        # Get current/target gameweek
+        if gameweek is None:
+            current_gw = client.get_current_gameweek()
+            gameweek = current_gw.get("id") if current_gw else 1
+        
+        # Get team picks for the gameweek
+        picks_data = client.get_team_picks(team_id, gameweek)
+        
+        # Get all players data for name resolution
+        all_players = client.get_players()
+        players_map = {player["id"]: player for player in all_players}
+        
+        # Extract captain and vice captain info
+        captain_id = None
+        vice_captain_id = None
+        captain_name = None
+        vice_captain_name = None
+        
+        picks = picks_data.get("picks", [])
+        for pick in picks:
+            if pick.get("is_captain", False):
+                captain_id = pick.get("element")
+                if captain_id and captain_id in players_map:
+                    player_data = players_map[captain_id]
+                    captain_name = f"{player_data.get('first_name', '')} {player_data.get('second_name', '')}".strip()
+            
+            if pick.get("is_vice_captain", False):
+                vice_captain_id = pick.get("element")
+                if vice_captain_id and vice_captain_id in players_map:
+                    player_data = players_map[vice_captain_id]
+                    vice_captain_name = f"{player_data.get('first_name', '')} {player_data.get('second_name', '')}".strip()
+        
+        # Get player details with enhanced breakdowns
+        enhanced_players = []
+        for pick in picks:
+            player_id = pick.get("element")
+            if player_id and player_id in players_map:
+                player_data = players_map[player_id]
+                
+                # Create basic breakdown
+                base_breakdown = _simple_event_breakdown(player_data)
+                
+                # Get opponent for zone adjustment (simplified - using first upcoming fixture)
+                upcoming_fixtures = client.get_team_fixtures(player_data.get("team", 0), 1)
+                opponent_team_id = None
+                if upcoming_fixtures:
+                    fixture = upcoming_fixtures[0]
+                    # Determine opponent
+                    if fixture.get("team_h") == player_data.get("team"):
+                        opponent_team_id = fixture.get("team_a")
+                    else:
+                        opponent_team_id = fixture.get("team_h")
+                
+                # Enhance breakdown with advanced metrics
+                enhanced_breakdown = enhance_breakdown_with_advanced_metrics(
+                    base_breakdown,
+                    player_data,
+                    opponent_team_id,
+                    player_id
+                )
+                
+                # Format player info
+                position_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
+                player_info = {
+                    "id": player_id,
+                    "name": f"{player_data.get('first_name', '')} {player_data.get('second_name', '')}".strip(),
+                    "position": position_map.get(player_data.get("element_type"), "Unknown"),
+                    "team_id": player_data.get("team", 0),
+                    "cost": player_data.get("now_cost", 0) / 10.0,
+                    "total_points": player_data.get("total_points", 0),
+                    "is_captain": pick.get("is_captain", False),
+                    "is_vice_captain": pick.get("is_vice_captain", False),
+                    "multiplier": pick.get("multiplier", 1),
+                    "breakdown": enhanced_breakdown
+                }
+                enhanced_players.append(player_info)
+        
+        # Get transfer information
+        transfers_data = client.get_team_transfers(team_id)
+        transfers_made = len([t for t in transfers_data if t.get("event") == gameweek])
+        
+        # Build response
+        response = {
+            "team_id": team_id,
+            "team_name": team_info.get("name", f"Team {team_id}"),
+            "manager_name": f"{team_info.get('player_first_name', '')} {team_info.get('player_last_name', '')}".strip(),
+            "total_points": team_info.get("summary_overall_points", 0),
+            "gameweek_points": team_info.get("summary_event_points", 0),
+            "overall_rank": team_info.get("summary_overall_rank", 0),
+            "gameweek_rank": team_info.get("summary_event_rank", 0),
+            "captain": captain_id,
+            "vice_captain": vice_captain_id,
+            "captain_name": captain_name,
+            "vice_captain_name": vice_captain_name,
+            "players": enhanced_players,
+            "transfers_made": transfers_made,
+            "free_transfers": picks_data.get("entry_history", {}).get("event_transfers", 0),
+            "bank_balance": picks_data.get("entry_history", {}).get("bank", 0) / 10.0,
+            "gameweek": gameweek
+        }
+        
+        return response
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching team summary: {str(e)}")
 
 
 if __name__ == "__main__":

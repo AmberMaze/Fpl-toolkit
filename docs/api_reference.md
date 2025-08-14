@@ -58,7 +58,8 @@ Get API information and available endpoints.
     "advisor": "/advisor",
     "projections": "/projections/{id}",
     "transfer_scenario": "/transfer-scenario",
-    "fixture_difficulty": "/fixtures/{team_id}"
+    "fixture_difficulty": "/fixtures/{team_id}",
+    "team_summary": "/team/{team_id}/summary"
   }
 }
 ```
@@ -450,6 +451,99 @@ GET /fixtures/14?next_n=8
 **Status Codes:**
 - `200`: Success
 - `500`: Server error
+
+---
+
+## Team Management Endpoints
+
+### Team Summary
+
+#### `GET /team/{team_id}/summary`
+
+Get comprehensive team summary including captain/vice captain names and enhanced player breakdowns with optional advanced metrics.
+
+**Path Parameters:**
+- `team_id` (required): FPL manager team ID
+
+**Query Parameters:**
+- `gameweek` (optional): Target gameweek (default: current gameweek)
+
+**Example Request:**
+```bash
+GET /team/12345/summary?gameweek=10
+```
+
+**Response:**
+```json
+{
+  "team_id": 12345,
+  "team_name": "Amber's Arsenal",
+  "manager_name": "Amber Bridgers",
+  "total_points": 1847,
+  "gameweek_points": 78,
+  "overall_rank": 125000,
+  "gameweek_rank": 89000,
+  "captain": 283,
+  "vice_captain": 254,
+  "captain_name": "Erling Haaland",
+  "vice_captain_name": "Mohamed Salah",
+  "players": [
+    {
+      "id": 283,
+      "name": "Erling Haaland",
+      "position": "FWD",
+      "team_id": 1,
+      "cost": 13.0,
+      "total_points": 267,
+      "is_captain": true,
+      "is_vice_captain": false,
+      "multiplier": 2,
+      "breakdown": {
+        "appearance": 1.9,
+        "goals": 3.1,
+        "assists": 1.2,
+        "cs": 0.2,
+        "bonus": 0.7,
+        "misc": 0.5,
+        "total": 7.6,
+        "adjustments": {
+          "xg_per90": 0.58,
+          "xa_per90": 0.32,
+          "zone_multiplier": 1.08
+        }
+      }
+    }
+  ],
+  "transfers_made": 1,
+  "free_transfers": 1,
+  "bank_balance": 1.5,
+  "gameweek": 10
+}
+```
+
+**Breakdown Fields:**
+- `appearance`: Base appearance points
+- `goals`: Projected goal points
+- `assists`: Projected assist points  
+- `cs`: Clean sheet points (defenders/goalkeepers)
+- `bonus`: Bonus point projection
+- `misc`: Miscellaneous points (saves, etc.)
+- `total`: Sum of all breakdown components
+- `adjustments` (optional): Advanced metrics applied
+  - `xg_per90`: Expected goals per 90 minutes
+  - `xa_per90`: Expected assists per 90 minutes  
+  - `zone_multiplier`: Zone weakness adjustment factor
+
+**Status Codes:**
+- `200`: Success
+- `404`: Team not found
+- `500`: Server error
+
+**Notes:**
+- Captain and vice captain names are resolved from the player database
+- Enhanced breakdowns include optional advanced metrics when available
+- Zone adjustments consider opponent team weaknesses
+- Graceful fallback when advanced metrics unavailable
 
 ---
 

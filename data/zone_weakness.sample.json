@@ -1,0 +1,102 @@
+{
+  "1": {
+    "left_conceded_index": 0.95,
+    "center_conceded_index": 1.02,
+    "right_conceded_index": 1.03
+  },
+  "2": {
+    "left_conceded_index": 1.08,
+    "center_conceded_index": 0.98,
+    "right_conceded_index": 0.94
+  },
+  "3": {
+    "left_conceded_index": 1.15,
+    "center_conceded_index": 1.05,
+    "right_conceded_index": 0.80
+  },
+  "4": {
+    "left_conceded_index": 0.92,
+    "center_conceded_index": 1.03,
+    "right_conceded_index": 1.05
+  },
+  "5": {
+    "left_conceded_index": 1.12,
+    "center_conceded_index": 0.91,
+    "right_conceded_index": 0.97
+  },
+  "6": {
+    "left_conceded_index": 0.88,
+    "center_conceded_index": 1.07,
+    "right_conceded_index": 1.05
+  },
+  "7": {
+    "left_conceded_index": 1.20,
+    "center_conceded_index": 0.85,
+    "right_conceded_index": 0.95
+  },
+  "8": {
+    "left_conceded_index": 0.90,
+    "center_conceded_index": 1.08,
+    "right_conceded_index": 1.02
+  },
+  "9": {
+    "left_conceded_index": 1.05,
+    "center_conceded_index": 0.96,
+    "right_conceded_index": 0.99
+  },
+  "10": {
+    "left_conceded_index": 0.85,
+    "center_conceded_index": 1.12,
+    "right_conceded_index": 1.03
+  },
+  "11": {
+    "left_conceded_index": 1.18,
+    "center_conceded_index": 0.87,
+    "right_conceded_index": 0.95
+  },
+  "12": {
+    "left_conceded_index": 0.93,
+    "center_conceded_index": 1.04,
+    "right_conceded_index": 1.03
+  },
+  "13": {
+    "left_conceded_index": 1.25,
+    "center_conceded_index": 0.82,
+    "right_conceded_index": 0.93
+  },
+  "14": {
+    "left_conceded_index": 0.88,
+    "center_conceded_index": 1.09,
+    "right_conceded_index": 1.03
+  },
+  "15": {
+    "left_conceded_index": 1.10,
+    "center_conceded_index": 0.94,
+    "right_conceded_index": 0.96
+  },
+  "16": {
+    "left_conceded_index": 0.91,
+    "center_conceded_index": 1.06,
+    "right_conceded_index": 1.03
+  },
+  "17": {
+    "left_conceded_index": 1.15,
+    "center_conceded_index": 0.90,
+    "right_conceded_index": 0.95
+  },
+  "18": {
+    "left_conceded_index": 0.87,
+    "center_conceded_index": 1.08,
+    "right_conceded_index": 1.05
+  },
+  "19": {
+    "left_conceded_index": 1.22,
+    "center_conceded_index": 0.84,
+    "right_conceded_index": 0.94
+  },
+  "20": {
+    "left_conceded_index": 0.94,
+    "center_conceded_index": 1.02,
+    "right_conceded_index": 1.04
+  }
+}

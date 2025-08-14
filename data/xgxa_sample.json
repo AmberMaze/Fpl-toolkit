@@ -1,0 +1,82 @@
+{
+  "haaland": {
+    "xg_per90": 1.28,
+    "xa_per90": 0.15
+  },
+  "salah": {
+    "xg_per90": 0.89,
+    "xa_per90": 0.32
+  },
+  "son": {
+    "xg_per90": 0.72,
+    "xa_per90": 0.28
+  },
+  "kane": {
+    "xg_per90": 0.95,
+    "xa_per90": 0.22
+  },
+  "de bruyne": {
+    "xg_per90": 0.45,
+    "xa_per90": 0.58
+  },
+  "bruno fernandes": {
+    "xg_per90": 0.52,
+    "xa_per90": 0.41
+  },
+  "sterling": {
+    "xg_per90": 0.68,
+    "xa_per90": 0.25
+  },
+  "rashford": {
+    "xg_per90": 0.71,
+    "xa_per90": 0.18
+  },
+  "foden": {
+    "xg_per90": 0.58,
+    "xa_per90": 0.35
+  },
+  "maddison": {
+    "xg_per90": 0.42,
+    "xa_per90": 0.48
+  },
+  "saka": {
+    "xg_per90": 0.46,
+    "xa_per90": 0.42
+  },
+  "odegaard": {
+    "xg_per90": 0.38,
+    "xa_per90": 0.45
+  },
+  "mahrez": {
+    "xg_per90": 0.55,
+    "xa_per90": 0.31
+  },
+  "mount": {
+    "xg_per90": 0.35,
+    "xa_per90": 0.28
+  },
+  "grealish": {
+    "xg_per90": 0.41,
+    "xa_per90": 0.38
+  },
+  "wilson": {
+    "xg_per90": 0.82,
+    "xa_per90": 0.08
+  },
+  "watkins": {
+    "xg_per90": 0.76,
+    "xa_per90": 0.12
+  },
+  "toney": {
+    "xg_per90": 0.73,
+    "xa_per90": 0.15
+  },
+  "mitoma": {
+    "xg_per90": 0.48,
+    "xa_per90": 0.22
+  },
+  "trossard": {
+    "xg_per90": 0.52,
+    "xa_per90": 0.31
+  }
+}
