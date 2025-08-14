@@ -147,7 +147,65 @@ uvicorn fpl_toolkit.service.api:app --host 0.0.0.0 --port 8000
 - `GET /projections/{id}` - Player projections
 - `POST /transfer-scenario` - Analyze transfers
 - `GET /fixtures/{team_id}` - Fixture difficulty
-- `GET /team/{team_id}/summary` - Team summary with captain names and enhanced breakdowns
+- `GET /team/{team_id}/picks` - Get team picks and lineup
+- `GET /team/{team_id}/advisor` - Get automatic team advice
+- `GET /team/{team_id}/summary` - Get team summary with projections
+- `GET /team/{team_id}/projections` - Get team projection aggregates
+
+### Example Requests
+
+```bash
+# Get all players with filters
+curl "http://localhost:8000/players?position=FWD&min_cost=8.0"
+
+# Get player details
+curl "http://localhost:8000/player/123"
+
+# Compare multiple players
+curl -X POST "http://localhost:8000/compare" \
+  -H "Content-Type: application/json" \
+  -d '{"player_ids": [1, 2, 3], "horizon_gameweeks": 5}'
+
+# Get AI team advice (traditional)
+curl -X POST "http://localhost:8000/advisor" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "player_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    "budget": 2.5,
+    "free_transfers": 1
+  }'
+
+# Get team picks (new team-centric endpoint)
+curl "http://localhost:8000/team/123456/picks"
+
+# Get automatic team advice (new team-centric endpoint)
+curl "http://localhost:8000/team/123456/advisor?horizon=5&free_transfers=1"
+
+# Get team summary with breakdown (new team-centric endpoint)
+curl "http://localhost:8000/team/123456/summary?horizon=5"
+```
+
+## Mobile Access
+
+The new team-centric endpoints dramatically simplify mobile FPL management:
+
+**Before**: Complex workflow requiring manual player ID collection
+```javascript
+// Old way: Manual player ID collection required
+const picks = await fetch('/team/123456/picks');
+const playerIds = picks.picks.map(p => p.element); // Manual extraction
+const advice = await fetch('/advisor', {
+  method: 'POST', 
+  body: JSON.stringify({player_ids: playerIds, budget: 2.5})
+});
+```
+
+**Now**: Direct team analysis with single API calls
+```javascript
+// New way: Direct team analysis
+const advice = await fetch('/team/123456/advisor?free_transfers=1');
+const summary = await fetch('/team/123456/summary?horizon=5');
+```
 
 ## Advanced Metrics & Zone Adjustments
 
@@ -387,6 +445,41 @@ The toolkit implements respectful rate limiting:
 - **Automatic caching** of FPL API responses (1 hour default)
 - **Request throttling** to avoid overwhelming FPL servers
 - **Configurable cache TTL** via environment variables
+
+## Deployment
+
+### Docker Deployment
+
+Build and run with Docker:
+
+```bash
+# Build the Docker image
+docker build -t fpl-toolkit .
+
+# Run the container
+docker run -p 8000:8000 fpl-toolkit
+
+# Access the API at http://localhost:8000
+```
+
+### Render Deployment
+
+For easy deployment to Render:
+
+1. Fork this repository
+2. Connect your GitHub repo to Render
+3. Create a new Web Service with these settings:
+   - **Build Command**: `pip install '.[web]'`
+   - **Start Command**: `python -m fpl_toolkit.cli serve --host 0.0.0.0 --port $PORT`
+   - **Environment**: Python 3.11
+
+### Other Cloud Platforms
+
+The included Dockerfile works with any container-based hosting:
+- Heroku (using heroku.yml)
+- Google Cloud Run  
+- AWS ECS/Fargate
+- Azure Container Instances
 
 ## Development
 
