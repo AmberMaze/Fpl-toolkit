@@ -1,0 +1,12 @@
+# Exported from Render on 2025-08-14T20:00:03Z
+services:
+- type: web
+  name: Fpl-toolkit
+  runtime: docker
+  repo: https://github.com/AmberMaze/Fpl-toolkit
+  plan: free
+  region: frankfurt
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: checksPass
+version: "1"
