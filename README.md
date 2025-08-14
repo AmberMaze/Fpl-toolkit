@@ -147,6 +147,10 @@ uvicorn fpl_toolkit.service.api:app --host 0.0.0.0 --port 8000
 - `GET /projections/{id}` - Player projections
 - `POST /transfer-scenario` - Analyze transfers
 - `GET /fixtures/{team_id}` - Fixture difficulty
+- `GET /team/{team_id}/picks` - Get team picks and lineup
+- `GET /team/{team_id}/advisor` - Get automatic team advice
+- `GET /team/{team_id}/summary` - Get team summary with projections
+- `GET /team/{team_id}/projections` - Get team projection aggregates
 
 ### Example Requests
 
@@ -167,6 +171,15 @@ curl -X POST "http://localhost:8000/advisor" \
     "budget": 2.5,
     "free_transfers": 1
   }'
+
+# Get team picks (new team-centric endpoint)
+curl "http://localhost:8000/team/123456/picks"
+
+# Get automatic team advice (new team-centric endpoint)
+curl "http://localhost:8000/team/123456/advisor?horizon=5&free_transfers=1"
+
+# Get team summary with breakdown (new team-centric endpoint)
+curl "http://localhost:8000/team/123456/summary?horizon=5"
 ```
 
 ## Mobile Access
@@ -257,6 +270,41 @@ The toolkit implements respectful rate limiting:
 - **Automatic caching** of FPL API responses (1 hour default)
 - **Request throttling** to avoid overwhelming FPL servers
 - **Configurable cache TTL** via environment variables
+
+## Deployment
+
+### Docker Deployment
+
+Build and run with Docker:
+
+```bash
+# Build the Docker image
+docker build -t fpl-toolkit .
+
+# Run the container
+docker run -p 8000:8000 fpl-toolkit
+
+# Access the API at http://localhost:8000
+```
+
+### Render Deployment
+
+For easy deployment to Render:
+
+1. Fork this repository
+2. Connect your GitHub repo to Render
+3. Create a new Web Service with these settings:
+   - **Build Command**: `pip install '.[web]'`
+   - **Start Command**: `python -m fpl_toolkit.cli serve --host 0.0.0.0 --port $PORT`
+   - **Environment**: Python 3.11
+
+### Other Cloud Platforms
+
+The included Dockerfile works with any container-based hosting:
+- Heroku (using heroku.yml)
+- Google Cloud Run  
+- AWS ECS/Fargate
+- Azure Container Instances
 
 ## Development
 
