@@ -329,7 +329,7 @@ async def get_team_summary(
             
             # ENHANCED: Apply advanced metrics and zone adjustments
             enhanced_breakdown = enhance_breakdown_with_advanced_metrics(
-                breakdown, player_data, next_gw_points
+                breakdown, player_data, next_gw_points, opponent_team_id, player_id
             )
             
             # Player summary
