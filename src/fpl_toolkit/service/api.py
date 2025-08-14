@@ -8,6 +8,7 @@ from ..ai.advisor import FPLAdvisor
 from ..analysis.projections import calculate_horizon_projection, compare_player_projections
 from ..analysis.decisions import analyze_transfer_scenario, find_transfer_targets
 from ..analysis.fixtures import compute_fixture_difficulty
+from .team_endpoints import team_router
 
 
 # Pydantic models for request/response
@@ -66,6 +67,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include team router
+app.include_router(team_router)
+
 
 # Dependency to get FPL client
 def get_fpl_client():
@@ -99,7 +103,11 @@ async def root():
             "advisor": "/advisor",
             "projections": "/projections/{id}",
             "transfer_scenario": "/transfer-scenario",
-            "fixture_difficulty": "/fixtures/{team_id}"
+            "fixture_difficulty": "/fixtures/{team_id}",
+            "team_picks": "/team/{team_id}/picks",
+            "team_advisor": "/team/{team_id}/advisor",
+            "team_summary": "/team/{team_id}/summary",
+            "team_projections": "/team/{team_id}/projections"
         }
     }
 

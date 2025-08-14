@@ -1,5 +1,214 @@
 # API Reference
 
+## Overview
+The FPL Toolkit API provides comprehensive endpoints for Fantasy Premier League analysis, decision support, and team management. All endpoints are mobile-optimized and return JSON responses.
+
+## Base URL
+```
+http://localhost:8000
+```
+
+## Team-Centric Endpoints
+
+### Get Team Picks
+
+#### `GET /team/{team_id}/picks`
+
+Get raw picks data from the FPL API for a specific team, including bank, transfers, and captain flags.
+
+**Path Parameters:**
+- `team_id` (required): FPL team ID
+
+**Query Parameters:**
+- `gameweek` (optional): Specific gameweek (default: current gameweek)
+
+**Example Request:**
+```bash
+GET /team/123456/picks?gameweek=26
+```
+
+**Response:**
+```json
+{
+  "team_id": 123456,
+  "team_name": "My FPL Team",
+  "manager_name": "John Smith",
+  "gameweek": 26,
+  "picks": [
+    {
+      "element": 1,
+      "position": 1,
+      "multiplier": 2,
+      "is_captain": true,
+      "is_vice_captain": false
+    }
+  ],
+  "bank": 2.5,
+  "total_transfers": 1,
+  "transfer_cost": 4,
+  "points": 65,
+  "overall_rank": 150000
+}
+```
+
+---
+
+### Get Team Advisor
+
+#### `GET /team/{team_id}/advisor`
+
+Get AI-powered team advice by automatically deriving player IDs from current picks.
+
+**Path Parameters:**
+- `team_id` (required): FPL team ID
+
+**Query Parameters:**
+- `horizon` (optional): Analysis horizon in gameweeks (default: 5)
+- `free_transfers` (optional): Number of free transfers available (default: 1)
+
+**Example Request:**
+```bash
+GET /team/123456/advisor?horizon=5&free_transfers=1
+```
+
+**Response:**
+```json
+{
+  "team_id": 123456,
+  "summary": "Team looks solid with 75.5 projected points. 1 player needs attention.",
+  "top_differentials": [
+    {
+      "player_name": "Player Name",
+      "ownership": "5.2%",
+      "projected_points": 8.5
+    }
+  ],
+  "recommendations": [
+    "Consider transferring out underperforming midfielder",
+    "Captain choice looks optimal for upcoming fixtures"
+  ],
+  "underperformers": [
+    {
+      "player_name": "Player Name",
+      "recent_form": 2.1,
+      "recommendation": "Transfer candidate"
+    }
+  ],
+  "horizon_gameweeks": 5,
+  "bank": 2.5,
+  "free_transfers": 1
+}
+```
+
+---
+
+### Get Team Summary
+
+#### `GET /team/{team_id}/summary`
+
+Get detailed team summary with per-player next GW projections and heuristic breakdown.
+
+**Path Parameters:**
+- `team_id` (required): FPL team ID
+
+**Query Parameters:**
+- `horizon` (optional): Analysis horizon in gameweeks (default: 5)
+
+**Example Request:**
+```bash
+GET /team/123456/summary?horizon=5
+```
+
+**Response:**
+```json
+{
+  "team_id": 123456,
+  "horizon_gameweeks": 5,
+  "bank": 2.5,
+  "transfers_made": 1,
+  "squad_projections": [
+    {
+      "player_id": 1,
+      "name": "Player Name",
+      "position": "FWD",
+      "team_id": 1,
+      "cost": 12.5,
+      "is_captain": true,
+      "is_vice_captain": false,
+      "is_bench": false,
+      "next_gw_points": 8.5,
+      "total_horizon_points": 42.3,
+      "confidence": 0.82,
+      "fixture_difficulty": 2.8,
+      "expected_minutes": 90,
+      "breakdown": {
+        "appearance": 2.0,
+        "goals": 3.5,
+        "assists": 1.2,
+        "cs": 0.3,
+        "bonus": 1.2,
+        "misc": 0.3,
+        "total": 8.5
+      }
+    }
+  ],
+  "team_totals": {
+    "next_gw_points": 65.2,
+    "total_horizon_points": 326.0,
+    "average_confidence": 0.75
+  }
+}
+```
+
+---
+
+### Get Team Projections
+
+#### `GET /team/{team_id}/projections`
+
+Get aggregated horizon points and average projected GW points for each squad player.
+
+**Path Parameters:**
+- `team_id` (required): FPL team ID
+
+**Query Parameters:**
+- `horizon` (optional): Analysis horizon in gameweeks (default: 5)
+
+**Example Request:**
+```bash
+GET /team/123456/projections?horizon=5
+```
+
+**Response:**
+```json
+{
+  "team_id": 123456,
+  "horizon_gameweeks": 5,
+  "player_projections": [
+    {
+      "player_id": 1,
+      "name": "Player Name",
+      "position": "FWD",
+      "is_bench": false,
+      "squad_position": 1,
+      "total_horizon_points": 42.3,
+      "average_gw_points": 8.46
+    }
+  ],
+  "aggregates": {
+    "starting_xi_total": 326.0,
+    "bench_total": 24.5,
+    "squad_total": 350.5,
+    "starting_xi_average": 29.6,
+    "squad_average": 23.4
+  }
+}
+```
+
+---
+
+## Player Analysis Endpoints
+
 This document provides comprehensive reference for the FPL Toolkit FastAPI endpoints.
 
 ## Base Information
@@ -573,7 +782,7 @@ const comparison = await fetch('/compare', {
   })
 }).then(res => res.json());
 
-// Get team advice
+// Get team advice (traditional)
 const advice = await fetch('/advisor', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -583,6 +792,22 @@ const advice = await fetch('/advisor', {
     free_transfers: 1
   })
 }).then(res => res.json());
+
+// Get team picks (new team endpoint)
+const teamPicks = await fetch('/team/123456/picks')
+  .then(res => res.json());
+
+// Get automatic team advice (new team endpoint)
+const teamAdvice = await fetch('/team/123456/advisor?horizon=5&free_transfers=1')
+  .then(res => res.json());
+
+// Get team summary with breakdown (new team endpoint)
+const teamSummary = await fetch('/team/123456/summary?horizon=5')
+  .then(res => res.json());
+
+// Get team projections (new team endpoint)
+const teamProjections = await fetch('/team/123456/projections?horizon=5')
+  .then(res => res.json());
 ```
 
 ### Python/Requests
