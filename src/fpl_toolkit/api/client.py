@@ -141,6 +141,106 @@ class FPLClient:
             "fixtures": player_details.get("fixtures", [])
         }
     
+    def get_user_team(self, team_id: int) -> Dict[str, Any]:
+        """Get user's team information."""
+        cache_key = f"entry_{team_id}"
+        cached_data = self._get_cached(cache_key)
+        if cached_data:
+            return cached_data
+        
+        response = self.session.get(f"{self.base_url}/entry/{team_id}/")
+        response.raise_for_status()
+        data = response.json()
+        
+        self._set_cache(cache_key, data)
+        return data
+    
+    def get_team_picks(self, team_id: int, gameweek: Optional[int] = None) -> Dict[str, Any]:
+        """Get user's team picks for a specific gameweek."""
+        if not gameweek:
+            current_gw = self.get_current_gameweek()
+            gameweek = current_gw.get("id") if current_gw else 1
+        
+        cache_key = f"picks_{team_id}_{gameweek}"
+        cached_data = self._get_cached(cache_key)
+        if cached_data:
+            return cached_data
+        
+        response = self.session.get(f"{self.base_url}/entry/{team_id}/event/{gameweek}/picks/")
+        response.raise_for_status()
+        data = response.json()
+        
+        self._set_cache(cache_key, data)
+        return data
+    
+    def get_team_transfers(self, team_id: int) -> List[Dict[str, Any]]:
+        """Get user's transfer history."""
+        cache_key = f"transfers_{team_id}"
+        cached_data = self._get_cached(cache_key)
+        if cached_data:
+            return cached_data
+        
+        response = self.session.get(f"{self.base_url}/entry/{team_id}/transfers/")
+        response.raise_for_status()
+        data = response.json()
+        
+        self._set_cache(cache_key, data)
+        return data
+    
+    def get_league_standings(self, league_id: int, page: int = 1) -> Dict[str, Any]:
+        """Get league standings."""
+        cache_key = f"league_{league_id}_{page}"
+        cached_data = self._get_cached(cache_key)
+        if cached_data:
+            return cached_data
+        
+        response = self.session.get(f"{self.base_url}/leagues-classic/{league_id}/standings/?page_standings={page}")
+        response.raise_for_status()
+        data = response.json()
+        
+        self._set_cache(cache_key, data)
+        return data
+    
+    def get_dream_team(self, gameweek: Optional[int] = None) -> Dict[str, Any]:
+        """Get dream team for a specific gameweek."""
+        if not gameweek:
+            current_gw = self.get_current_gameweek()
+            gameweek = current_gw.get("id") if current_gw else 1
+        
+        cache_key = f"dream_team_{gameweek}"
+        cached_data = self._get_cached(cache_key)
+        if cached_data:
+            return cached_data
+        
+        response = self.session.get(f"{self.base_url}/dream-team/{gameweek}/")
+        response.raise_for_status()
+        data = response.json()
+        
+        self._set_cache(cache_key, data)
+        return data
+    
+    def get_live_gameweek(self, gameweek: Optional[int] = None) -> Dict[str, Any]:
+        """Get live gameweek data with player scores."""
+        if not gameweek:
+            current_gw = self.get_current_gameweek()
+            gameweek = current_gw.get("id") if current_gw else 1
+        
+        cache_key = f"live_{gameweek}"
+        cached_data = self._get_cached(cache_key)
+        if cached_data:
+            return cached_data
+        
+        response = self.session.get(f"{self.base_url}/event/{gameweek}/live/")
+        response.raise_for_status()
+        data = response.json()
+        
+        # Shorter cache for live data
+        self._cache[cache_key] = {
+            "data": data,
+            "timestamp": datetime.now()
+        }
+        return data
+    
     def close(self) -> None:
         """Close the HTTP session."""
         self.session.close()

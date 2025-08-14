@@ -66,8 +66,10 @@ def streamlit(port):
 @click.option("--budget", default=100.0, help="Available budget")
 @click.option("--free-transfers", default=1, help="Number of free transfers")
 @click.option("--horizon", default=5, help="Number of gameweeks to analyze")
-def advise(player_ids, budget, free_transfers, horizon):
-    """Get AI advice for your team."""
+@click.option("--scenarios", is_flag=True, help="Include scenario planning")
+@click.option("--weekly", is_flag=True, help="Include weekly strategy")
+def advise(player_ids, budget, free_transfers, horizon, scenarios, weekly):
+    """Get comprehensive AI advice for your team."""
     if not player_ids:
         click.echo("❌ Please provide player IDs: fpl-toolkit advise 1 2 3 ...")
         return
@@ -82,29 +84,258 @@ def advise(player_ids, budget, free_transfers, horizon):
             "horizon_gameweeks": horizon
         }
         
-        click.echo("🤖 Analyzing your team...")
+        click.echo("🤖 Analyzing your team with AI...")
         advice = advisor.advise_team(team_state)
         
         click.echo("\n📊 Team Analysis Summary:")
         click.echo(advice["summary"])
         
+        # Show season context
+        context = advice.get("season_context", {})
+        if context:
+            click.echo(f"\n🎯 Season Context: GW{context.get('gameweek', 1)} ({context.get('phase', 'unknown')} season)")
+        
+        # Show recommendations
         if advice["recommendations"]:
-            click.echo("\n💡 Recommendations:")
+            click.echo("\n💡 AI Recommendations:")
             for rec in advice["recommendations"]:
                 priority_emoji = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(rec["priority"], "ℹ️")
                 click.echo(f"  {priority_emoji} {rec['message']}")
+                if rec.get("reasoning"):
+                    click.echo(f"    └─ {rec['reasoning']}")
         
+        # Show underperformers with AI analysis
         if advice["underperformers"]:
-            click.echo("\n⚠️ Players to consider transferring:")
+            click.echo("\n⚠️ Players flagged by AI analysis:")
             for under in advice["underperformers"][:3]:
                 player = under["player"]
                 name = f"{player.get('first_name', '')} {player.get('second_name', '')}".strip()
-                click.echo(f"  • {name}: {', '.join(under['issues'])}")
+                severity = under.get("severity_score", 0)
+                ai_sentiment = under.get("ai_sentiment", {})
+                
+                severity_emoji = "🔥" if severity >= 5 else "⚠️" if severity >= 3 else "💭"
+                click.echo(f"  {severity_emoji} {name} (severity: {severity})")
+                click.echo(f"    └─ Issues: {', '.join(under['issues'])}")
+                click.echo(f"    └─ {under.get('recommendation', '')}")
+                
+                if ai_sentiment.get("sentiment") != "neutral":
+                    click.echo(f"    └─ AI sentiment: {ai_sentiment.get('sentiment')} (confidence: {ai_sentiment.get('confidence', 0):.2f})")
+        
+        # Show scenarios if requested
+        if scenarios and advice.get("scenarios"):
+            click.echo("\n📈 Scenario Analysis:")
+            scenario_comp = advice.get("scenario_comparison", {})
+            if scenario_comp:
+                click.echo(f"  {scenario_comp.get('recommendation', '')}")
+            
+            for i, scenario in enumerate(advice["scenarios"][:3], 1):
+                risk_emoji = {"Low": "🟢", "Medium": "🟡", "High": "🔴"}.get(scenario.get("risk_level"), "⚪")
+                click.echo(f"\n  {i}. {scenario.get('name')} {risk_emoji}")
+                click.echo(f"     Expected: {scenario.get('net_points', 0):.1f} points")
+                click.echo(f"     Risk: {scenario.get('risk_level', 'Unknown')}")
+                click.echo(f"     Description: {scenario.get('description', '')}")
+        
+        # Show weekly strategy if requested
+        if weekly and advice.get("weekly_strategy"):
+            weekly_strat = advice["weekly_strategy"]
+            click.echo(f"\n📅 Weekly Strategy ({weekly_strat.get('weeks_planned', 0)} weeks):")
+            click.echo(f"  {weekly_strat.get('summary', '')}")
         
         advisor.close()
         
     except Exception as e:
         click.echo(f"❌ Error generating advice: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+@main.command()
+@click.argument("team_id", type=int)
+@click.option("--gameweek", type=int, help="Specific gameweek (default: current)")
+def team(team_id, gameweek):
+    """Fetch and analyze a user's team from FPL."""
+    try:
+        with FPLClient() as client:
+            # Get team information
+            team_info = client.get_user_team(team_id)
+            picks = client.get_team_picks(team_id, gameweek)
+            
+            click.echo(f"👤 Team: {team_info.get('name', 'Unknown')}")
+            click.echo(f"📊 Manager: {team_info.get('player_first_name', '')} {team_info.get('player_last_name', '')}")
+            click.echo(f"🏆 Overall Points: {team_info.get('summary_overall_points', 0)}")
+            click.echo(f"📈 Overall Rank: {team_info.get('summary_overall_rank', 'N/A'):,}")
+            click.echo(f"💰 Bank: £{picks.get('entry_history', {}).get('bank', 0) / 10:.1f}m")
+            
+            # Get player details
+            all_players = client.get_players()
+            player_lookup = {p["id"]: p for p in all_players}
+            
+            current_picks = picks.get("picks", [])
+            if current_picks:
+                click.echo(f"\n📋 Current Team (GW {picks.get('entry_history', {}).get('event', '?')}):")
+                click.echo("-" * 70)
+                
+                total_value = 0
+                for pick in current_picks:
+                    player_id = pick.get("element")
+                    if player_id in player_lookup:
+                        player = player_lookup[player_id]
+                        name = f"{player.get('first_name', '')} {player.get('second_name', '')}".strip()
+                        cost = player.get("now_cost", 0) / 10.0
+                        position = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}.get(player.get("element_type"), "?")
+                        
+                        total_value += cost
+                        
+                        captain_status = ""
+                        if pick.get("is_captain"):
+                            captain_status = " (C)"
+                        elif pick.get("is_vice_captain"):
+                            captain_status = " (V)"
+                        
+                        bench_status = " [BENCH]" if pick.get("position", 1) > 11 else ""
+                        
+                        click.echo(f"{name:<25} {position:<3} £{cost:>5.1f}m{captain_status}{bench_status}")
+                
+                click.echo(f"\n💰 Total Team Value: £{total_value:.1f}m")
+            
+    except Exception as e:
+        click.echo(f"❌ Error fetching team: {e}")
+
+
+@main.command()
+@click.argument("team_id", type=int)
+@click.option("--budget", type=float, help="Available budget (auto-detected if not provided)")
+@click.option("--free-transfers", type=int, help="Free transfers (auto-detected if not provided)")
+@click.option("--scenarios", default=5, help="Number of scenarios to generate")
+def scenarios(team_id, budget, free_transfers, scenarios):
+    """Generate scenario plans for a user's team."""
+    try:
+        from .ai.scenario_planner import ScenarioPlanner
+        
+        with FPLClient() as client:
+            # Get current team
+            picks = client.get_team_picks(team_id)
+            team_info = client.get_user_team(team_id)
+            
+            current_picks = picks.get("picks", [])
+            player_ids = [pick.get("element") for pick in current_picks if pick.get("position", 1) <= 11]
+            
+            # Auto-detect budget and transfers if not provided
+            if budget is None:
+                bank = picks.get("entry_history", {}).get("bank", 0) / 10.0
+                budget = bank  # Available cash
+            
+            if free_transfers is None:
+                # This would need to be calculated based on transfer history
+                free_transfers = 1  # Default assumption
+            
+            team_state = {
+                "player_ids": player_ids,
+                "budget": budget,
+                "free_transfers": free_transfers,
+                "horizon_gameweeks": 5
+            }
+            
+            click.echo(f"📊 Generating {scenarios} scenarios for team {team_info.get('name', 'Unknown')}...")
+            click.echo(f"💰 Available budget: £{budget:.1f}m")
+            click.echo(f"🔄 Free transfers: {free_transfers}")
+            
+            planner = ScenarioPlanner(client)
+            scenario_list = planner.plan_gameweek_scenarios(team_state, scenarios)
+            comparison = planner.compare_scenarios(scenario_list)
+            
+            click.echo("\n🎯 Scenario Analysis:")
+            click.echo(f"  {comparison.get('recommendation', '')}")
+            click.echo(f"  Point range: {comparison.get('point_range', 0):.1f} between best and worst")
+            
+            click.echo("\n📈 Scenarios (ranked by expected points):")
+            click.echo("=" * 80)
+            
+            for i, scenario in enumerate(scenario_list, 1):
+                risk_emoji = {"Low": "🟢", "Medium": "🟡", "High": "🔴"}.get(scenario.get("risk_level"), "⚪")
+                
+                click.echo(f"\n{i}. {scenario.get('name')} {risk_emoji}")
+                click.echo(f"   Expected Points: {scenario.get('net_points', 0):.1f}")
+                click.echo(f"   Transfer Cost: -{scenario.get('transfer_cost', 0)} points")
+                click.echo(f"   Risk Level: {scenario.get('risk_level', 'Unknown')}")
+                click.echo(f"   Description: {scenario.get('description', '')}")
+                
+                transfers = scenario.get("transfers", [])
+                if transfers:
+                    click.echo("   Transfers:")
+                    for transfer in transfers:
+                        out_name = transfer.get("out", {}).get("second_name", "Unknown")
+                        in_name = transfer.get("in", {}).get("second_name", "Unknown")
+                        point_gain = transfer.get("point_gain", 0)
+                        click.echo(f"     • {out_name} → {in_name} (+{point_gain:.1f} pts)")
+                
+                click.echo(f"   Reasoning: {scenario.get('reasoning', '')}")
+            
+    except Exception as e:
+        click.echo(f"❌ Error generating scenarios: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+@main.command()
+@click.argument("team_id", type=int)
+@click.option("--weeks", default=4, help="Number of weeks to plan ahead")
+def weekly(team_id, weeks):
+    """Generate weekly strategy for upcoming gameweeks."""
+    try:
+        from .ai.scenario_planner import ScenarioPlanner
+        
+        with FPLClient() as client:
+            # Get current team
+            picks = client.get_team_picks(team_id)
+            team_info = client.get_user_team(team_id)
+            
+            current_picks = picks.get("picks", [])
+            player_ids = [pick.get("element") for pick in current_picks if pick.get("position", 1) <= 11]
+            
+            team_state = {
+                "player_ids": player_ids,
+                "budget": picks.get("entry_history", {}).get("bank", 0) / 10.0,
+                "free_transfers": 1,  # Default assumption
+                "horizon_gameweeks": 5
+            }
+            
+            click.echo(f"📅 Generating {weeks}-week strategy for {team_info.get('name', 'Unknown')}...")
+            
+            planner = ScenarioPlanner(client)
+            weekly_strategy = planner.plan_weekly_strategy(team_state, weeks)
+            
+            click.echo(f"\n🎯 Strategy Summary:")
+            click.echo(f"  {weekly_strategy.get('summary', '')}")
+            click.echo(f"  Current GW: {weekly_strategy.get('current_gameweek', 'Unknown')}")
+            click.echo(f"  Total transfers planned: {weekly_strategy.get('total_transfers_planned', 0)}")
+            
+            weekly_plans = weekly_strategy.get("weekly_strategy", {})
+            
+            click.echo(f"\n📊 Week-by-Week Analysis:")
+            click.echo("=" * 60)
+            
+            for gw_key, plan in weekly_plans.items():
+                click.echo(f"\n{gw_key}:")
+                click.echo(f"  Expected Points: {plan.get('expected_points', 0):.1f}")
+                click.echo(f"  Fixture Summary: {plan.get('fixture_summary', 'N/A')}")
+                
+                recommended_transfers = plan.get("recommended_transfers", [])
+                if recommended_transfers:
+                    click.echo("  Recommended Transfers:")
+                    for transfer in recommended_transfers:
+                        player_name = transfer.get("out", {}).get("second_name", "Unknown")
+                        reason = transfer.get("reason", "")
+                        priority = transfer.get("priority", "medium")
+                        priority_emoji = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(priority, "ℹ️")
+                        click.echo(f"    {priority_emoji} Consider transferring {player_name}: {reason}")
+                else:
+                    click.echo("  ✅ No transfers recommended")
+            
+    except Exception as e:
+        click.echo(f"❌ Error generating weekly strategy: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 @main.command()
