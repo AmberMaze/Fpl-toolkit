@@ -396,9 +396,10 @@ async def get_transfer_targets(
         raise HTTPException(status_code=500, detail=f"Error finding transfer targets: {str(e)}")
 
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)week (default: current gameweek)"),
+@app.get("/team/{team_id}/summary")
+async def get_team_summary(
+    team_id: int,
+    gameweek: Optional[int] = Query(None, description="Target gameweek (default: current gameweek)"),
     client: FPLClient = Depends(get_fpl_client)
 ):
     """Get team summary with captain/vice captain names and enhanced breakdowns."""

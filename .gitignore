@@ -205,3 +205,21 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# FPL Toolkit specific
+# Database files
+fpl_toolkit.db
+
+# IDE files  
+.vscode/
+*.swp
+*.swo
+
+# AI model cache
+.cache/
+models/
+
+# Development artifacts
+tmp/
+temp/
+.tmp/
