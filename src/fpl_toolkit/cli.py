@@ -24,7 +24,7 @@ def init():
 
 @main.command()
 @click.option("--host", default="0.0.0.0", help="Host to bind the API server")
-@click.option("--port", default=8000, help="Port to bind the API server")
+@click.option("--port", default=int(os.getenv("PORT", 8000)), type=int, help="Port to bind the API server")
 @click.option("--reload", is_flag=True, help="Enable auto-reload for development")
 def serve(host, port, reload):
     """Start the FastAPI server."""

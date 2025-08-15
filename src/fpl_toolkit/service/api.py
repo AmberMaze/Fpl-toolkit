@@ -1,6 +1,6 @@
 """FastAPI service for mobile-friendly FPL toolkit endpoints."""
 from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from ..api.client import FPLClient
@@ -89,27 +89,19 @@ def get_fpl_advisor():
         advisor.close()
 
 
-@app.get("/")
-async def root():
-    """Root endpoint with API information."""
-    return {
-        "message": "FPL Toolkit API",
-        "version": "0.1.0",
-        "endpoints": {
-            "health": "/health",
-            "players": "/players",
-            "player_detail": "/player/{id}",
-            "compare": "/compare",
-            "advisor": "/advisor",
-            "projections": "/projections/{id}",
-            "transfer_scenario": "/transfer-scenario",
-            "fixture_difficulty": "/fixtures/{team_id}",
-            "team_picks": "/team/{team_id}/picks",
-            "team_advisor": "/team/{team_id}/advisor",
-            "team_summary": "/team/{team_id}/summary",
-            "team_projections": "/team/{team_id}/projections"
-        }
-    }
+@app.get("/", include_in_schema=False)
+def root():
+    return {"status": "ok", "service": "fpl-toolkit"}
+
+
+@app.head("/", include_in_schema=False)
+def root_head():
+    return Response(status_code=200)
+
+
+@app.get("/healthz", include_in_schema=False)
+def healthz():
+    return {"ok": True}
 
 
 @app.get("/health")
