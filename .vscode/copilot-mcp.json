@@ -1,0 +1,18 @@
+{
+  "allowList": [
+    "https://httpbin.org",
+    "https://fpl-toolkit.onrender.com",
+    "http://localhost:8000",
+    "http://localhost:5173"
+  ],
+  "mcpServers": {
+    "httpbin": {
+      "type": "http",
+      "url": "https://httpbin.org"
+    },
+    "fplApi": {
+      "type": "http",
+      "url": "https://fpl-toolkit.onrender.com"
+    }
+  }
+}

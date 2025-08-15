@@ -1,2 +1,38 @@
 {
+    "workbench.editorAssociations": {
+        "*.copilotmd": "vscode.markdown.preview.editor",
+        "*.pdf": "default"
+    },
+    "workbench.colorTheme": "Tokyo Right",
+    "explorer.confirmDragAndDrop": false,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "cSpell.userWords": [
+        "bundlesize",
+        "supabase"
+    ],
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "workbench.experimental.share.enabled": true,
+    "firefox.keepProfileChanges": true,
+    "firefox.profile": "Debug",
+    "github.copilot.chat.agent.thinkingTool": true,
+    "github.copilot.chat.languageContext.inline.typescript.enabled": true,
+    "playwright.showTrace": true,
+    "github.copilot.advanced": {},
+     "editor.formatOnSave": true,
+
+    // Formatters
+    "[python]": { "editor.defaultFormatter": "ms-python.python" },
+    "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "github.copilot.chat.toolset": "fpl-toolkit",
+
+
+    // Copilot Chat: Agent powers
+    "github.copilot.chat.agent.enableTerminalActions": true,
+    "github.copilot.chat.agent.enableFileSystemActions": true,
+
+    // Nice quality-of-life
+    "github.copilot.chat.inlineEdit.enabled": true,
+    "github.copilot.chat.experimental.restoreLastSession": true
 }
