@@ -1,18 +1,29 @@
 {
   "allowList": [
-    "https://httpbin.org",
     "https://fpl-toolkit.onrender.com",
     "http://localhost:8000",
-    "http://localhost:5173"
+    "https://fantasy.premierleague.com"
   ],
   "mcpServers": {
-    "httpbin": {
-      "type": "http",
-      "url": "https://httpbin.org"
-    },
     "fplApi": {
       "type": "http",
-      "url": "https://fpl-toolkit.onrender.com"
+      "url": "https://fpl-toolkit.onrender.com",
+      "capabilities": {
+        "tools": [
+          "GET /",
+          "GET /healthz",
+          "GET /api/players",
+          "GET /api/fixtures",
+          "GET /api/gameweeks"
+        ]
+      }
+    },
+    "localDev": {
+      "type": "http",
+      "url": "http://localhost:8000",
+      "capabilities": {
+        "tools": ["GET /healthz", "GET /api/debug"]
+      }
     }
   }
 }

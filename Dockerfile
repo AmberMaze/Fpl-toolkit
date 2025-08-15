@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 
 # Install Python dependencies
-RUN pip install --upgrade pip && pip install '.[web]'
+RUN pip install --upgrade pip && pip install '.[web,ai]'
 
 # Expose port
 EXPOSE 8000

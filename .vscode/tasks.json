@@ -1,153 +1,108 @@
 {
     "version": "2.0.0",
     "tasks": [
+        // Build & Setup Tasks
         {
             "label": "Install Dependencies",
             "type": "shell",
-            "command": "pip",
-            "args": ["install", "-e", ".[dev,web,ai,postgresql]"],
+            "command": "pip install -e .[dev,web,ai,postgresql]",
             "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "problemMatcher": []
-        },
-        {
-            "label": "Run Tests",
-            "type": "shell",
-            "command": "python",
-            "args": ["-m", "pytest", "tests/", "-v", "--tb=short"],
-            "group": "test",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Setup Environment",
+            "type": "shell",
+            "command": "python -m venv venv && source venv/bin/activate && pip install -e .[dev,web,ai,postgresql]",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        
+        // Testing Tasks
+        {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": "python -m pytest tests/ -v",
+            "group": "test",
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
                     "PYTHONPATH": "${workspaceFolder}/src"
                 }
             },
-            "problemMatcher": [
-                "$python"
-            ]
+            "problemMatcher": ["$python"]
         },
         {
             "label": "Run Tests with Coverage",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "pytest", "--cov=src/fpl_toolkit", "--cov-report=html", "--cov-report=term", "tests/"],
+            "command": "python -m pytest tests/ --cov=src/fpl_toolkit --cov-report=html --cov-report=term",
             "group": "test",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
                     "PYTHONPATH": "${workspaceFolder}/src"
                 }
             },
-            "problemMatcher": []
+            "problemMatcher": ["$python"]
         },
         {
-            "label": "Format Code (Black)",
+            "label": "Quick Test",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "black", "src/", "tests/", "streamlit_app.py"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared"
-            },
+            "command": "python -m pytest tests/ -x --tb=short",
+            "group": "test",
             "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Lint Code (Ruff)",
-            "type": "shell",
-            "command": "python",
-            "args": ["-m", "ruff", "check", "src/", "tests/", "streamlit_app.py"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [
-                {
-                    "owner": "ruff",
-                    "fileLocation": ["relative", "${workspaceFolder}"],
-                    "pattern": {
-                        "regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+)\\s+(.+)$",
-                        "file": 1,
-                        "line": 2,
-                        "column": 3,
-                        "severity": 4,
-                        "message": 5
-                    }
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/src"
                 }
-            ]
+            },
+            "problemMatcher": ["$python"]
+        },
+        
+        // Code Quality Tasks
+        {
+            "label": "Format Code",
+            "type": "shell",
+            "command": "python -m black src/ tests/",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
         },
         {
-            "label": "Type Check (MyPy)",
+            "label": "Lint Code",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "mypy", "src/fpl_toolkit/"],
+            "command": "python -m ruff check src/ tests/",
             "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "problemMatcher": [
-                {
-                    "owner": "mypy",
-                    "fileLocation": ["relative", "${workspaceFolder}"],
-                    "pattern": {
-                        "regexp": "^(.+):(\\d+):\\s+(\\w+):\\s+(.+)$",
-                        "file": 1,
-                        "line": 2,
-                        "severity": 3,
-                        "message": 4
-                    }
-                }
-            ]
+            "problemMatcher": ["$python"]
         },
+        {
+            "label": "Format & Lint",
+            "type": "shell",
+            "command": "python -m black src/ tests/ && python -m ruff check src/ tests/",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        
+        // Development Server Tasks
         {
             "label": "Start FastAPI Server",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "fpl_toolkit.cli", "serve", "--reload"],
+            "command": "python -m fpl_toolkit.cli serve --reload",
             "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "new"
-            },
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
@@ -155,36 +110,17 @@
                 }
             },
             "isBackground": true,
-            "problemMatcher": [
-                {
-                    "pattern": [
-                        {
-                            "regexp": ".",
-                            "file": 1,
-                            "location": 2,
-                            "message": 3
-                        }
-                    ],
-                    "background": {
-                        "activeOnStart": true,
-                        "beginsPattern": ".",
-                        "endsPattern": "."
-                    }
-                }
-            ]
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "new"
+            }
         },
         {
-            "label": "Start Streamlit App",
+            "label": "Start Streamlit",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "fpl_toolkit.cli", "streamlit"],
+            "command": "python -m fpl_toolkit.cli streamlit",
             "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "new"
-            },
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
@@ -192,63 +128,56 @@
                 }
             },
             "isBackground": true,
-            "problemMatcher": []
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "new"
+            }
         },
+        
+        // Database Tasks
         {
             "label": "Initialize Database",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "fpl_toolkit.cli", "init"],
+            "command": "python -m fpl_toolkit.cli init",
             "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
                     "PYTHONPATH": "${workspaceFolder}/src"
                 }
-            },
-            "problemMatcher": []
+            }
         },
+        
+        // Docker Tasks
         {
             "label": "Build Docker Image",
             "type": "shell",
-            "command": "docker",
-            "args": ["build", "-t", "fpl-toolkit", "."],
+            "command": "docker build -t fpl-toolkit .",
             "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Run Docker Container",
+            "type": "shell",
+            "command": "docker run -p 8000:8000 fpl-toolkit",
+            "group": "build",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "problemMatcher": []
+            "isBackground": true
         },
+        
+        // Utility Tasks
         {
-            "label": "Run All Checks",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "Format Code (Black)",
-                "Lint Code (Ruff)",
-                "Type Check (MyPy)",
-                "Run Tests"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
+            "label": "Clean Cache",
+            "type": "shell",
+            "command": "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && find . -name '*.pyc' -delete",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
             }
         }
     ]

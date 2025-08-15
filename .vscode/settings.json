@@ -1,39 +1,16 @@
 {
-    "workbench.editorAssociations": {
-        "*.copilotmd": "vscode.markdown.preview.editor",
-        "*.pdf": "default"
-    },
+    // Theme and editor configuration
     "workbench.colorTheme": "Tokyo Right",
+    "editor.formatOnSave": true,
+    "editor.rulers": [88],
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 88,
+    "editor.minimap.enabled": true,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.inlineSuggest.enabled": true,
     "explorer.confirmDragAndDrop": false,
-    "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    
-    // Spell checking with FPL-specific terms
-    "cSpell.userWords": [
-        "bundlesize",
-        "supabase",
-        "fpl",
-        "toolkit",
-        "gameweek",
-        "xG",
-        "xA",
-        "FastAPI",
-        "Streamlit",
-        "SQLAlchemy",
-        "Pydantic",
-        "uvicorn",
-        "pytest",
-        "mypy",
-        "ruff",
-        "xlA",
-        "FPLClient",
-        "FPLAdvisor",
-        "differentials",
-        "wildcard",
-        "benchboost",
-        "freehit",
-        "triplecaptain"
-    ],
+    "workbench.startupEditor": "welcomePage",
     
     // GitHub Copilot configuration
     "github.copilot.enable": {
@@ -45,66 +22,27 @@
     "github.copilot.chat.toolset": "fpl-toolkit",
     "github.copilot.chat.instructionsFile": ".github/copilot-instructions.md",
     
-    // Browser/Debug configuration
-    "firefox.keepProfileChanges": true,
-    "firefox.profile": "Debug",
-    "playwright.showTrace": true,
-    
-    // General editor settings
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": "explicit",
-        "source.fixAll": "explicit"
-    },
-    "editor.rulers": [88],
-    "editor.wordWrap": "bounded",
-    "editor.wordWrapColumn": 88,
-    
-    // Python-specific settings
+    // Python development
     "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.extraPaths": ["./src"],
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.autoSearchPaths": true,
-    "python.analysis.extraPaths": [
-        "./src"
-    ],
+    "python.analysis.include": ["src"],
     "python.defaultInterpreterPath": "./venv/bin/python",
     "python.terminal.activateEnvironment": true,
-    "python.terminal.activateEnvInCurrentTerminal": true,
-    
-    // Testing configuration
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestArgs": [
-        "tests",
-        "-v",
-        "--tb=short"
-    ],
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     
-    // Language-specific formatters
+    // Language formatters
     "[python]": { 
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.tabSize": 4,
         "editor.insertSpaces": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit",
-            "source.fixAll.ruff": "explicit"
+            "source.organizeImports": "explicit"
         }
     },
-    "[typescript]": { 
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 2
-    },
-    "[javascript]": { 
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 2
-    },
     "[json]": { 
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.tabSize": 2
-    },
-    "[jsonc]": { 
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 2
     },
@@ -114,113 +52,92 @@
     },
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one",
-        "editor.wordWrap": "bounded",
-        "editor.wordWrapColumn": 80
+        "editor.wordWrap": "on"
+    },
+    "[dockerfile]": {
+        "editor.tabSize": 2
     },
     
-    // File associations for FPL toolkit
+    // File associations
     "files.associations": {
         "*.env*": "properties",
         "Dockerfile*": "dockerfile",
-        "*.copilotmd": "markdown",
-        "render.yaml": "yaml"
+        "*.http": "http",
+        "*.rest": "http"
     },
     
-    // Git settings
-    "git.autofetch": true,
-    "git.confirmSync": false,
+    // Git configuration
     "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "git.openRepositoryInParentFolders": "always",
     
-    // Terminal settings
-    "terminal.integrated.defaultProfile.linux": "bash",
+    // Spell checking with FPL terms
+    "cSpell.userWords": [
+        "fpl", "toolkit", "gameweek", "xG", "xA", "FastAPI", "Streamlit",
+        "SQLAlchemy", "Pydantic", "uvicorn", "pytest", "mypy", "ruff",
+        "differentials", "captaincy", "wildcards", "benchboost", "freehit"
+    ],
+    
+    // Search and file exclusions
+    "search.exclude": {
+        "**/venv": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/htmlcov": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true,
+        "**/node_modules": true,
+        "**/.git": true
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.pytest_cache": true
+    },
+    
+    // REST Client configuration
+    "rest-client.environmentVariables": {
+        "local": {
+            "baseUrl": "http://localhost:8000",
+            "apiUrl": "http://localhost:8000/api"
+        },
+        "production": {
+            "baseUrl": "https://fpl-toolkit.onrender.com",
+            "apiUrl": "https://fpl-toolkit.onrender.com/api"
+        }
+    },
+    
+    // Database configuration
+    "postgresql.connections": [],
+    
+    // Docker configuration
+    "docker.attachShellCommand.linuxContainer": "/bin/bash",
+    
+    // Error display
+    "errorLens.enabledDiagnosticLevels": ["error", "warning", "info"],
+    "errorLens.excludeByMessage": ["never used"],
+    
+    // Todo Tree configuration
+    "todo-tree.general.tags": [
+        "TODO",
+        "FIXME",
+        "BUG",
+        "HACK",
+        "NOTE"
+    ],
+    
+    // Terminal with PYTHONPATH
     "terminal.integrated.profiles.linux": {
         "bash": {
             "path": "bash",
-            "args": [],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
         }
     },
+    "terminal.integrated.defaultProfile.linux": "bash",
     
-    // Linting and formatting tools
-    "ruff.lint.args": [
-        "--config=pyproject.toml"
-    ],
-    "black-formatter.args": [
-        "--config=pyproject.toml"
-    ],
-    "mypy-type-checker.args": [
-        "--config-file=pyproject.toml"
-    ],
-    
-    // Search and file handling
-    "search.exclude": {
-        "**/node_modules": true,
-        "**/venv": true,
-        "**/__pycache__": true,
-        "**/.pytest_cache": true,
-        "**/htmlcov": true,
-        "**/.coverage": true,
-        "**/*.pyc": true,
-        "**/.mypy_cache": true,
-        "**/.ruff_cache": true
-    },
-    "files.exclude": {
-        "**/__pycache__": true,
-        "**/.pytest_cache": true,
-        "**/*.pyc": true
-    },
-    "files.watcherExclude": {
-        "**/venv/**": true,
-        "**/__pycache__/**": true,
-        "**/.pytest_cache/**": true,
-        "**/htmlcov/**": true,
-        "**/.mypy_cache/**": true,
-        "**/.ruff_cache/**": true
-    },
-    
-    // Docker settings
-    "docker.defaultRegistryPath": "fpl-toolkit",
-    
-    // REST Client settings for API testing
-    "rest-client.environmentVariables": {
-        "local": {
-            "baseUrl": "http://localhost:8000",
-            "streamlitUrl": "http://localhost:8501"
-        },
-        "production": {
-            "baseUrl": "https://fpl-toolkit.onrender.com"
-        }
-    },
-    
-    // Jupyter settings (for AI/ML development)
+    // Jupyter configuration
     "jupyter.askForKernelRestart": false,
-    "jupyter.interactiveWindow.textEditor.executeSelection": true,
-    
-    // Error lens for better error visibility
-    "errorLens.enabledDiagnosticLevels": [
-        "error",
-        "warning",
-        "info"
-    ],
-    "errorLens.excludeBySource": [
-        "cSpell"
-    ],
-    
-    // Todo tree configuration
-    "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])",
-    "todo-tree.general.tags": [
-        "BUG",
-        "HACK",
-        "FIXME",
-        "TODO",
-        "XXX",
-        "[ ]",
-        "[x]"
-    ],
-    
-    // Auto-save for better development experience
-    "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 1000
+    "jupyter.interactiveWindow.collapseCellInputCode": "fromKeyboard"
 }
