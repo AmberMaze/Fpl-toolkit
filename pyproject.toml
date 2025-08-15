@@ -23,6 +23,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "sqlalchemy>=2.0.0",
     "httpx>=0.24.0",
     "pydantic>=2.0.0",
     "click>=8.0.0",
@@ -30,9 +31,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-db = [
-    "sqlalchemy>=2.0.0"
-    ]
 web = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.20.0",
