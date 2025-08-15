@@ -1,0 +1,30 @@
+{
+    "folders": [
+        {
+            "name": "FPL Toolkit",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "./venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.cwd": "${workspaceFolder}",
+        "files.exclude": {
+            "**/__pycache__": true,
+            "**/.pytest_cache": true,
+            "**/htmlcov": true,
+            "**/.mypy_cache": true,
+            "**/.ruff_cache": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance", 
+            "ms-python.black-formatter",
+            "charliermarsh.ruff",
+            "github.copilot",
+            "github.copilot-chat"
+        ]
+    }
+}

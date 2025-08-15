@@ -34,8 +34,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        # Only start PostgreSQL service when needed
-        if: matrix.database == 'postgresql'
+        # PostgreSQL service is always started, but only used when matrix.database == 'postgresql'
 
     steps:
     - uses: actions/checkout@v4
