@@ -2,7 +2,30 @@
 from typing import List, Dict, Any, Optional, Tuple
 import os
 import json
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    # Create a minimal numpy substitute for basic operations
+    class NumpySubstitute:
+        @staticmethod
+        def var(data):
+            if not data:
+                return 0
+            mean = sum(data) / len(data)
+            return sum((x - mean) ** 2 for x in data) / len(data)
+        
+        @staticmethod
+        def mean(data):
+            return sum(data) / len(data) if data else 0
+            
+        @staticmethod
+        def std(data):
+            return (NumpySubstitute.var(data)) ** 0.5
+        
+        # Add ndarray as a simple list for compatibility
+        ndarray = list
+    
+    np = NumpySubstitute()
 from datetime import datetime, timedelta
 from ..api.client import FPLClient
 from ..analysis.fixtures import compute_fixture_difficulty
