@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Toolkit Enhanced - Mobile Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .manager-header {
+            background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .manager-header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .manager-header p {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+        
+        .main-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        
+        .main-header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+        
+        .team-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-top: 3px solid #667eea;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .position-section {
+            margin: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .position-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .position-content {
+            padding: 20px;
+        }
+        
+        .player-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .player-info {
+            flex: 1;
+        }
+        
+        .player-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .player-stats {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .add-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .action-bar {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .planning-card {
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .planning-card h3 {
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .planning-item {
+            margin: 10px 0;
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Manager Header -->
+        <div class="manager-header">
+            <h1>⚽ Manager ID: 4076192</h1>
+            <p>📱 Ready for Season 2024/25 | 🎯 5-Week Planning Active</p>
+        </div>
+        
+        <!-- Main Header -->
+        <div class="main-header">
+            <h2>🏗️ Enhanced Team Builder</h2>
+            <p>Perfect for pre-season planning!</p>
+        </div>
+        
+        <!-- Team Summary -->
+        <div class="team-summary">
+            <div class="metric-card">
+                <div class="metric-value">6/15</div>
+                <div class="metric-label">Players</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">£56m</div>
+                <div class="metric-label">Cost</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">209</div>
+                <div class="metric-label">5GW Pts</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">✅</div>
+                <div class="metric-label">Status</div>
+            </div>
+        </div>
+        
+        <!-- Goalkeepers Section -->
+        <div class="position-section">
+            <div class="position-header">
+                🎯 GOALKEEPERS (1/2)
+            </div>
+            <div class="position-content">
+                <div class="player-card">
+                    <div class="player-info">
+                        <div class="player-name">⚽ Alisson</div>
+                        <div class="player-stats">💰 £5.5m | 🔮 25.5pts (5GW)</div>
+                    </div>
+                    <button class="remove-btn">🗑️</button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <strong>➕ Add Goalkeeper:</strong>
+                    <div class="player-card" style="background: #e8f5e8;">
+                        <div class="player-info">
+                            <div class="player-name">⚽ Ramsdale</div>
+                            <div class="player-stats">💰 £4.5m | 🔮 22.1pts | 💎 4.9</div>
+                        </div>
+                        <button class="add-btn">➕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Forwards Section -->
+        <div class="position-section">
+            <div class="position-header">
+                🎯 FORWARDS (1/3)
+            </div>
+            <div class="position-content">
+                <div class="player-card">
+                    <div class="player-info">
+                        <div class="player-name">⚽ Haaland</div>
+                        <div class="player-stats">💰 £15.0m | 🔮 45.2pts (5GW)</div>
+                    </div>
+                    <button class="remove-btn">🗑️</button>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <strong>➕ Add Forward:</strong>
+                    <div class="player-card" style="background: #e8f5e8;">
+                        <div class="player-info">
+                            <div class="player-name">⚽ Kane</div>
+                            <div class="player-stats">💰 £12.5m | 🔮 39.1pts | 💎 3.1</div>
+                        </div>
+                        <button class="add-btn">➕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 5-Week Planning Preview -->
+        <div class="planning-card">
+            <h3>📅 5-Week Strategic Plan</h3>
+            <div class="planning-item">🏁 GW1: Foundation (70+ pts target)</div>
+            <div class="planning-item">🔥 GW2: Form players (68+ pts target)</div>
+            <div class="planning-item">💎 GW3-5: Fixtures & differentials</div>
+            <div class="planning-item">📊 Total Target: 350+ points</div>
+        </div>
+        
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button class="action-btn">📊 Analysis</button>
+            <button class="action-btn">🎯 Alternatives</button>
+            <button class="action-btn">💾 Save</button>
+        </div>
+    </div>
+</body>
+</html>
