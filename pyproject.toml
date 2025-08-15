@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fpl-toolkit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Fantasy Premier League toolkit with analysis, AI advisors, and mobile-friendly APIs"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -31,9 +31,8 @@ dependencies = [
 
 [project.optional-dependencies]
 db = [
-    "sqlalchemy>=2.0.0",
-    "psycopg2-binary; extra=='postgresql'",
-]
+    "sqlalchemy>=2.0.0"
+    ]
 web = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.20.0",
