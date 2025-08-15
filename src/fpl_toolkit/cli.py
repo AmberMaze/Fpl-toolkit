@@ -4,6 +4,10 @@ import os
 from .db.engine import init_db
 from .api.client import FPLClient
 from .ai.advisor import FPLAdvisor
+from .analysis.projections import calculate_horizon_projection
+from .analysis.decisions import evaluate_team_decisions, find_transfer_targets
+from .analysis.advanced_analysis import generate_custom_gameweek_projections
+from .ai.scenario_planner import ScenarioPlanner
 
 
 @click.group()
@@ -278,6 +282,99 @@ def scenarios(team_id, budget, free_transfers, scenarios):
 
 
 @main.command()
+@click.argument("player_ids", nargs=-1, type=int)
+@click.option("--budget", default=100.0, help="Available budget (£m)")
+@click.option("--free-transfers", default=1, help="Number of free transfers")
+@click.option("--gameweeks", default=6, help="Number of gameweeks to simulate")
+@click.option("--team-id", type=int, help="FPL team ID (auto-fetches current team)")
+@click.option("--formation", default="3-5-2", help="Preferred formation (e.g., 3-4-3, 3-5-2)")
+def simulate(player_ids, budget, free_transfers, gameweeks, team_id, formation):
+    """Run comprehensive team simulation with optimal XI, transfers, and projections."""
+    
+    # Determine player_ids from team_id if provided
+    if team_id and not player_ids:
+        try:
+            with FPLClient() as client:
+                picks = client.get_team_picks(team_id)
+                team_info = client.get_user_team(team_id)
+                current_picks = picks.get("picks", [])
+                player_ids = [pick.get("element") for pick in current_picks]
+                
+                # Auto-detect budget and transfers if not provided
+                if budget == 100.0:  # Default value
+                    bank = picks.get("entry_history", {}).get("bank", 0) / 10.0
+                    budget = bank
+                
+                click.echo(f"🏆 Simulating team: {team_info.get('name', 'Unknown')}")
+        except Exception as e:
+            click.echo(f"❌ Error fetching team {team_id}: {e}")
+            return
+    elif not player_ids:
+        click.echo("❌ Please provide player IDs or team ID: fpl-toolkit simulate --team-id 123 or fpl-toolkit simulate 1 2 3 ...")
+        return
+    
+    try:
+        click.echo(f"🎮 Running comprehensive {gameweeks}-gameweek simulation...")
+        click.echo(f"💰 Budget: £{budget:.1f}m | 🔄 Free Transfers: {free_transfers}")
+        click.echo("=" * 70)
+        
+        with FPLClient() as client:
+            # Get current gameweek
+            current_gw = client.get_current_gameweek()
+            start_gw = current_gw.get("id", 1) if current_gw else 1
+            end_gw = start_gw + gameweeks - 1
+            
+            click.echo(f"📅 Simulating GW{start_gw} to GW{end_gw}")
+            
+            # 1. Generate optimal XI for the gameweek range
+            click.echo("\n🎯 OPTIMAL XI ANALYSIS")
+            click.echo("-" * 30)
+            
+            optimal_xi = _generate_optimal_xi(client, list(player_ids), formation, start_gw, end_gw)
+            _display_optimal_xi(optimal_xi, formation)
+            
+            # 2. Transfer recommendations with timing
+            click.echo("\n🔄 TRANSFER RECOMMENDATIONS")
+            click.echo("-" * 35)
+            
+            transfer_analysis = _analyze_transfer_opportunities(client, list(player_ids), budget, free_transfers, gameweeks)
+            _display_transfer_recommendations(transfer_analysis)
+            
+            # 3. Players to watch
+            click.echo("\n👀 PLAYERS TO WATCH")
+            click.echo("-" * 25)
+            
+            watchlist = _generate_watchlist(client, list(player_ids), gameweeks)
+            _display_watchlist(watchlist)
+            
+            # 4. Opportunity cost analysis
+            click.echo("\n💸 OPPORTUNITY COST ANALYSIS")
+            click.echo("-" * 35)
+            
+            opportunity_costs = _calculate_opportunity_costs(client, list(player_ids), gameweeks)
+            _display_opportunity_costs(opportunity_costs)
+            
+            # 5. Ranking projections (scenarios)
+            click.echo("\n📈 GAMEWEEK RANKING PROJECTIONS")
+            click.echo("-" * 40)
+            
+            ranking_scenarios = _generate_ranking_scenarios(client, list(player_ids), optimal_xi, gameweeks)
+            _display_ranking_scenarios(ranking_scenarios)
+            
+            # 6. Summary and recommendations
+            click.echo("\n🎯 SIMULATION SUMMARY")
+            click.echo("-" * 25)
+            
+            summary = _generate_simulation_summary(optimal_xi, transfer_analysis, watchlist, opportunity_costs, ranking_scenarios)
+            _display_simulation_summary(summary)
+            
+    except Exception as e:
+        click.echo(f"❌ Error running simulation: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+@main.command()
 @click.argument("team_id", type=int)
 @click.option("--weeks", default=4, help="Number of weeks to plan ahead")
 def weekly(team_id, weeks):
@@ -417,6 +514,371 @@ def version():
     """Show version information."""
     from . import __version__
     click.echo(f"FPL Toolkit v{__version__}")
+
+
+# Helper functions for the simulate command
+def _generate_optimal_xi(client, player_ids, formation, start_gw, end_gw):
+    """Generate optimal XI based on projections."""
+    players = client.get_players()
+    player_lookup = {p["id"]: p for p in players}
+    
+    # Get projections for all players
+    projections = []
+    for pid in player_ids:
+        if pid not in player_lookup:
+            continue
+            
+        projection = calculate_horizon_projection(pid, end_gw - start_gw + 1, client)
+        if "error" not in projection:
+            player_data = player_lookup[pid]
+            projections.append({
+                "player_id": pid,
+                "player": player_data,
+                "projection": projection,
+                "position": player_data.get("element_type", 1),
+                "expected_points": projection.get("total_projected_points", 0)
+            })
+    
+    # Sort by position and expected points
+    by_position = {1: [], 2: [], 3: [], 4: []}
+    for proj in projections:
+        pos = proj["position"]
+        by_position[pos].append(proj)
+    
+    # Sort each position by expected points
+    for pos in by_position:
+        by_position[pos].sort(key=lambda x: x["expected_points"], reverse=True)
+    
+    # Parse formation (e.g., "3-5-2" -> [3, 5, 2])
+    formation_counts = [int(x) for x in formation.split("-")]
+    if len(formation_counts) != 3:
+        formation_counts = [3, 5, 2]  # Default
+    
+    # Select optimal XI based on formation
+    optimal_xi = {
+        "goalkeeper": by_position[1][:1],  # Always 1 GK
+        "defenders": by_position[2][:formation_counts[0]],
+        "midfielders": by_position[3][:formation_counts[1]], 
+        "forwards": by_position[4][:formation_counts[2]]
+    }
+    
+    # Calculate total expected points
+    total_points = sum([
+        sum(p["expected_points"] for p in pos_players)
+        for pos_players in optimal_xi.values()
+    ])
+    
+    optimal_xi["total_expected_points"] = total_points
+    optimal_xi["formation"] = formation
+    
+    return optimal_xi
+
+
+def _display_optimal_xi(optimal_xi, formation):
+    """Display the optimal XI."""
+    click.echo(f"Formation: {formation}")
+    click.echo(f"Total Expected Points: {optimal_xi['total_expected_points']:.1f}")
+    click.echo()
+    
+    positions = [
+        ("Goalkeeper", optimal_xi["goalkeeper"]), 
+        ("Defenders", optimal_xi["defenders"]),
+        ("Midfielders", optimal_xi["midfielders"]),
+        ("Forwards", optimal_xi["forwards"])
+    ]
+    
+    for pos_name, players in positions:
+        if players:
+            click.echo(f"{pos_name}:")
+            for player in players:
+                p = player["player"]
+                name = f"{p.get('first_name', '')} {p.get('second_name', '')}".strip()
+                points = player["expected_points"]
+                cost = p.get("now_cost", 0) / 10.0
+                click.echo(f"  • {name} - {points:.1f} pts (£{cost:.1f}m)")
+
+
+def _analyze_transfer_opportunities(client, player_ids, budget, free_transfers, gameweeks):
+    """Analyze transfer opportunities."""
+    # Use existing decision analysis
+    decisions = evaluate_team_decisions(player_ids, budget, free_transfers, gameweeks)
+    
+    # Enhance with timing analysis
+    transfer_suggestions = decisions.get("transfer_suggestions", [])
+    
+    # Add timing recommendations
+    for suggestion in transfer_suggestions:
+        # Simple timing logic - prioritize by urgency
+        urgency = suggestion.get("priority", 1)
+        if urgency == 1:
+            suggestion["timing"] = "Immediate"
+        elif urgency <= 2:
+            suggestion["timing"] = "Next 1-2 GWs"
+        else:
+            suggestion["timing"] = "Monitor"
+    
+    return {
+        "suggestions": transfer_suggestions[:5],  # Top 5
+        "summary": decisions.get("summary", "No major issues detected")
+    }
+
+
+def _display_transfer_recommendations(transfer_analysis):
+    """Display transfer recommendations."""
+    suggestions = transfer_analysis["suggestions"]
+    
+    if not suggestions:
+        click.echo("✅ No urgent transfers needed")
+        return
+    
+    click.echo(f"Found {len(suggestions)} transfer opportunities:")
+    click.echo()
+    
+    for i, suggestion in enumerate(suggestions, 1):
+        problem_player = suggestion.get("problem_player", {})
+        replacement_suggestions = suggestion.get("replacement_suggestions", [])
+        timing = suggestion.get("timing", "Monitor")
+        
+        p_name = f"{problem_player.get('first_name', '')} {problem_player.get('second_name', '')}".strip()
+        
+        click.echo(f"{i}. Transfer out: {p_name}")
+        click.echo(f"   Timing: {timing}")
+        click.echo(f"   Issues: {', '.join(suggestion.get('issues', []))}")
+        
+        if replacement_suggestions:
+            best_replacement = replacement_suggestions[0]
+            r_player = best_replacement.get("player_in", {})
+            r_name = f"{r_player.get('first_name', '')} {r_player.get('second_name', '')}".strip()
+            points_gain = best_replacement.get("projected_points_gain", 0)
+            click.echo(f"   Best replacement: {r_name} (+{points_gain:.1f} pts)")
+        click.echo()
+
+
+def _generate_watchlist(client, player_ids, gameweeks):
+    """Generate watchlist of promising players."""
+    players = client.get_players()
+    owned_players = set(player_ids)
+    
+    # Find promising players not in team
+    candidates = []
+    for player in players:
+        if player["id"] in owned_players:
+            continue
+        
+        # Filter by availability and basic criteria
+        if (player.get("status") != "a" or 
+            float(player.get("selected_by_percent", "0") or "0") < 1.0):
+            continue
+        
+        # Get projection
+        projection = calculate_horizon_projection(player["id"], gameweeks, client)
+        if "error" in projection:
+            continue
+            
+        # Calculate value metrics
+        expected_points = projection.get("total_projected_points", 0)
+        cost = player.get("now_cost", 0) / 10.0
+        value = expected_points / cost if cost > 0 else 0
+        
+        candidates.append({
+            "player": player,
+            "expected_points": expected_points,
+            "value": value,
+            "projection": projection
+        })
+    
+    # Sort by value and take top performers by position
+    candidates.sort(key=lambda x: x["value"], reverse=True)
+    
+    watchlist = {}
+    position_names = {1: "Goalkeepers", 2: "Defenders", 3: "Midfielders", 4: "Forwards"}
+    
+    for pos in [1, 2, 3, 4]:
+        pos_candidates = [c for c in candidates if c["player"].get("element_type") == pos]
+        watchlist[position_names[pos]] = pos_candidates[:3]  # Top 3 per position
+    
+    return watchlist
+
+
+def _display_watchlist(watchlist):
+    """Display watchlist."""
+    for position, players in watchlist.items():
+        if players:
+            click.echo(f"{position}:")
+            for player_data in players:
+                p = player_data["player"]
+                name = f"{p.get('first_name', '')} {p.get('second_name', '')}".strip()
+                points = player_data["expected_points"]
+                cost = p.get("now_cost", 0) / 10.0
+                value = player_data["value"]
+                ownership = p.get("selected_by_percent", "0")
+                click.echo(f"  • {name} - {points:.1f} pts, £{cost:.1f}m, Value: {value:.2f}, Own: {ownership}%")
+            click.echo()
+
+
+def _calculate_opportunity_costs(client, player_ids, gameweeks):
+    """Calculate opportunity cost for players not in team."""
+    players = client.get_players()
+    owned_players = set(player_ids)
+    
+    # Get projections for owned vs available players by position
+    opportunity_costs = {}
+    position_names = {1: "Goalkeepers", 2: "Defenders", 3: "Midfielders", 4: "Forwards"}
+    
+    for pos in [1, 2, 3, 4]:
+        # Find best available player in position
+        best_available = None
+        best_points = 0
+        
+        for player in players:
+            if (player["id"] not in owned_players and 
+                player.get("element_type") == pos and
+                player.get("status") == "a"):
+                
+                projection = calculate_horizon_projection(player["id"], gameweeks, client)
+                if "error" not in projection:
+                    points = projection.get("total_projected_points", 0)
+                    if points > best_points:
+                        best_points = points
+                        best_available = {
+                            "player": player,
+                            "expected_points": points,
+                            "projection": projection
+                        }
+        
+        # Find current best owned player in position
+        best_owned = None
+        best_owned_points = 0
+        
+        for pid in player_ids:
+            player = next((p for p in players if p["id"] == pid), None)
+            if player and player.get("element_type") == pos:
+                projection = calculate_horizon_projection(pid, gameweeks, client)
+                if "error" not in projection:
+                    points = projection.get("total_projected_points", 0)
+                    if points > best_owned_points:
+                        best_owned_points = points
+                        best_owned = {
+                            "player": player,
+                            "expected_points": points
+                        }
+        
+        if best_available and best_owned:
+            opportunity_cost = best_points - best_owned_points
+            opportunity_costs[position_names[pos]] = {
+                "available": best_available,
+                "owned": best_owned,
+                "cost": opportunity_cost
+            }
+    
+    return opportunity_costs
+
+
+def _display_opportunity_costs(opportunity_costs):
+    """Display opportunity cost analysis."""
+    total_cost = 0
+    
+    for position, data in opportunity_costs.items():
+        if data["cost"] > 0:  # Only show positive opportunity costs
+            avail = data["available"]["player"]
+            owned = data["owned"]["player"]
+            cost = data["cost"]
+            total_cost += cost
+            
+            avail_name = f"{avail.get('first_name', '')} {avail.get('second_name', '')}".strip()
+            owned_name = f"{owned.get('first_name', '')} {owned.get('second_name', '')}".strip()
+            
+            click.echo(f"{position}: Missing {cost:.1f} pts")
+            click.echo(f"  Current: {owned_name} ({data['owned']['expected_points']:.1f} pts)")
+            click.echo(f"  Best available: {avail_name} ({data['available']['expected_points']:.1f} pts)")
+            click.echo()
+    
+    if total_cost > 0:
+        click.echo(f"Total opportunity cost: {total_cost:.1f} points")
+    else:
+        click.echo("✅ No significant opportunity costs detected")
+
+
+def _generate_ranking_scenarios(client, player_ids, optimal_xi, gameweeks):
+    """Generate ranking projection scenarios."""
+    base_points = optimal_xi["total_expected_points"]
+    
+    # Generate different scenarios
+    scenarios = {
+        "best": base_points * 1.3,      # 30% above expectation
+        "expected": base_points,         # Expected performance
+        "unlucky": base_points * 0.7,   # 30% below expectation  
+        "worst": base_points * 0.5      # 50% below expectation
+    }
+    
+    # Estimate rankings based on average scores
+    # These are rough estimates - real implementation would need league data
+    avg_gw_score = 50  # Typical average
+    scenarios_with_ranks = {}
+    
+    for scenario, points in scenarios.items():
+        if points > avg_gw_score * 1.5:
+            rank_estimate = "Top 10%"
+        elif points > avg_gw_score * 1.2:
+            rank_estimate = "Top 25%"
+        elif points > avg_gw_score:
+            rank_estimate = "Above Average"
+        elif points > avg_gw_score * 0.8:
+            rank_estimate = "Below Average"
+        else:
+            rank_estimate = "Bottom 25%"
+        
+        scenarios_with_ranks[scenario] = {
+            "points": points,
+            "rank_estimate": rank_estimate
+        }
+    
+    return scenarios_with_ranks
+
+
+def _display_ranking_scenarios(ranking_scenarios):
+    """Display ranking scenarios."""
+    click.echo("Projected Performance Scenarios:")
+    click.echo()
+    
+    for scenario, data in ranking_scenarios.items():
+        emoji = {
+            "best": "🚀",
+            "expected": "📊", 
+            "unlucky": "😐",
+            "worst": "😞"
+        }.get(scenario, "📈")
+        
+        click.echo(f"{emoji} {scenario.title()}: {data['points']:.1f} pts ({data['rank_estimate']})")
+
+
+def _generate_simulation_summary(optimal_xi, transfer_analysis, watchlist, opportunity_costs, ranking_scenarios):
+    """Generate overall simulation summary."""
+    summary = {
+        "optimal_points": optimal_xi["total_expected_points"],
+        "formation": optimal_xi["formation"],
+        "transfer_count": len(transfer_analysis["suggestions"]),
+        "opportunity_cost": sum(data.get("cost", 0) for data in opportunity_costs.values()),
+        "expected_rank": ranking_scenarios["expected"]["rank_estimate"]
+    }
+    return summary
+
+
+def _display_simulation_summary(summary):
+    """Display simulation summary."""
+    click.echo(f"🎯 Expected Points (Optimal XI): {summary['optimal_points']:.1f}")
+    click.echo(f"📋 Recommended Formation: {summary['formation']}")
+    click.echo(f"🔄 Transfers Suggested: {summary['transfer_count']}")
+    click.echo(f"💸 Total Opportunity Cost: {summary['opportunity_cost']:.1f} pts")
+    click.echo(f"📈 Expected Rank: {summary['expected_rank']}")
+    click.echo()
+    
+    if summary['transfer_count'] > 0:
+        click.echo("💡 Priority: Focus on suggested transfers")
+    elif summary['opportunity_cost'] > 5:
+        click.echo("💡 Priority: Monitor watchlist players for future transfers") 
+    else:
+        click.echo("✅ Team looks solid - monitor form and fixtures")
 
 
 if __name__ == "__main__":
