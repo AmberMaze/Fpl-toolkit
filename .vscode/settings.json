@@ -7,32 +7,220 @@
     "explorer.confirmDragAndDrop": false,
     "javascript.updateImportsOnFileMove.enabled": "always",
     "typescript.updateImportsOnFileMove.enabled": "always",
+    
+    // Spell checking with FPL-specific terms
     "cSpell.userWords": [
         "bundlesize",
-        "supabase"
+        "supabase",
+        "fpl",
+        "toolkit",
+        "gameweek",
+        "xG",
+        "xA",
+        "FastAPI",
+        "Streamlit",
+        "SQLAlchemy",
+        "Pydantic",
+        "uvicorn",
+        "pytest",
+        "mypy",
+        "ruff",
+        "xlA",
+        "FPLClient",
+        "FPLAdvisor",
+        "differentials",
+        "wildcard",
+        "benchboost",
+        "freehit",
+        "triplecaptain"
     ],
-    "github.copilot.nextEditSuggestions.enabled": true,
-    "workbench.experimental.share.enabled": true,
+    
+    // GitHub Copilot configuration
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": false,
+        "plaintext": false
+    },
+    "github.copilot.editor.enableAutoCompletions": true,
+    "github.copilot.chat.toolset": "fpl-toolkit",
+    "github.copilot.chat.instructionsFile": ".github/copilot-instructions.md",
+    
+    // Browser/Debug configuration
     "firefox.keepProfileChanges": true,
     "firefox.profile": "Debug",
-    "github.copilot.chat.agent.thinkingTool": true,
-    "github.copilot.chat.languageContext.inline.typescript.enabled": true,
     "playwright.showTrace": true,
-    "github.copilot.advanced": {},
-     "editor.formatOnSave": true,
-
-    // Formatters
-    "[python]": { "editor.defaultFormatter": "ms-python.python" },
-    "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "github.copilot.chat.toolset": "fpl-toolkit",
-
-
-    // Copilot Chat: Agent powers
-    "github.copilot.chat.agent.enableTerminalActions": true,
-    "github.copilot.chat.agent.enableFileSystemActions": true,
-
-    // Nice quality-of-life
-    "github.copilot.chat.inlineEdit.enabled": true,
-    "github.copilot.chat.experimental.restoreLastSession": true
+    
+    // General editor settings
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll": "explicit"
+    },
+    "editor.rulers": [88],
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 88,
+    
+    // Python-specific settings
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.extraPaths": [
+        "./src"
+    ],
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    
+    // Testing configuration
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+        "tests",
+        "-v",
+        "--tb=short"
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    
+    // Language-specific formatters
+    "[python]": { 
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll.ruff": "explicit"
+        }
+    },
+    "[typescript]": { 
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2
+    },
+    "[javascript]": { 
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2
+    },
+    "[json]": { 
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2
+    },
+    "[jsonc]": { 
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2
+    },
+    "[yaml]": { 
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.tabSize": 2
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        "editor.wordWrap": "bounded",
+        "editor.wordWrapColumn": 80
+    },
+    
+    // File associations for FPL toolkit
+    "files.associations": {
+        "*.env*": "properties",
+        "Dockerfile*": "dockerfile",
+        "*.copilotmd": "markdown",
+        "render.yaml": "yaml"
+    },
+    
+    // Git settings
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    
+    // Terminal settings
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash",
+            "args": [],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        }
+    },
+    
+    // Linting and formatting tools
+    "ruff.lint.args": [
+        "--config=pyproject.toml"
+    ],
+    "black-formatter.args": [
+        "--config=pyproject.toml"
+    ],
+    "mypy-type-checker.args": [
+        "--config-file=pyproject.toml"
+    ],
+    
+    // Search and file handling
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/venv": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/htmlcov": true,
+        "**/.coverage": true,
+        "**/*.pyc": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/*.pyc": true
+    },
+    "files.watcherExclude": {
+        "**/venv/**": true,
+        "**/__pycache__/**": true,
+        "**/.pytest_cache/**": true,
+        "**/htmlcov/**": true,
+        "**/.mypy_cache/**": true,
+        "**/.ruff_cache/**": true
+    },
+    
+    // Docker settings
+    "docker.defaultRegistryPath": "fpl-toolkit",
+    
+    // REST Client settings for API testing
+    "rest-client.environmentVariables": {
+        "local": {
+            "baseUrl": "http://localhost:8000",
+            "streamlitUrl": "http://localhost:8501"
+        },
+        "production": {
+            "baseUrl": "https://fpl-toolkit.onrender.com"
+        }
+    },
+    
+    // Jupyter settings (for AI/ML development)
+    "jupyter.askForKernelRestart": false,
+    "jupyter.interactiveWindow.textEditor.executeSelection": true,
+    
+    // Error lens for better error visibility
+    "errorLens.enabledDiagnosticLevels": [
+        "error",
+        "warning",
+        "info"
+    ],
+    "errorLens.excludeBySource": [
+        "cSpell"
+    ],
+    
+    // Todo tree configuration
+    "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])",
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]",
+        "[x]"
+    ],
+    
+    // Auto-save for better development experience
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000
 }

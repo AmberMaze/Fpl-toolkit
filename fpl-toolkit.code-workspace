@@ -1,0 +1,31 @@
+{
+    "folders": [
+        {
+            "name": "FPL Toolkit",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "./venv/bin/python",
+        "python.terminal.activateEnvironment": true
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.debugpy",
+            "ms-python.vscode-pylance",
+            "ms-python.black-formatter",
+            "charliermarsh.ruff",
+            "github.copilot",
+            "github.copilot-chat"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": []
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": []
+    }
+}
