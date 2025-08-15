@@ -11,14 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY pyproject.toml README.md ./
+# Copy everything needed for build (LICENSE + src included)
+COPY . .
 
 # Install Python dependencies
 RUN pip install --upgrade pip && pip install '.[web]'
-
-# Copy source code
-COPY src ./src
 
 # Expose port
 EXPOSE 8000
