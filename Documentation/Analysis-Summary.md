@@ -104,7 +104,7 @@ services:
 
 **Recommendations:**
 - ✅ Already properly configured
-- Consider upgrading to paid plan for better performance
+- Monitor performance and adjust resources as needed
 - Add environment variables for database and AI features
 
 #### **🐳 Docker Deployment (Enhanced)**
@@ -207,25 +207,32 @@ databases:
 **Pros:** ✅ Managed PostgreSQL, good performance, reasonable pricing
 **Cons:** ❌ No free tier, more complex setup
 
-#### **4. AWS/Heroku (Enterprise)**
-**Best for:** Large scale, enterprise requirements
+#### **4. Personal Cloud Hosting**
+**Best for:** Personal use with custom domain (tyshub.xyz)
 
-**AWS Setup:**
+**Railway Setup (Recommended):**
 ```bash
-# ECS Fargate deployment
-# 1. Build and push to ECR
-# 2. Create ECS task definition
-# 3. Set up Application Load Balancer
-# 4. Configure RDS PostgreSQL
+# Simple personal deployment
+# 1. Connect GitHub repo to Railway
+# 2. Railway auto-deploys with PostgreSQL
+# 3. Configure tyshub.xyz domain
+# 4. Free $5/month credits cover personal usage
 ```
 
-**Heroku Setup:**
+**Cloudflare Pages Setup:**
 ```bash
-# Traditional Heroku
-heroku create fpl-toolkit
-heroku addons:create heroku-postgresql:hobby-dev
-git push heroku main
+# Frontend hosting
+# 1. Connect GitHub repo to Cloudflare Pages
+# 2. Unlimited builds (no limits like Netlify)
+# 3. Free SSL and global CDN
+# 4. Perfect for tyshub.xyz domain
 ```
+
+**Benefits:**
+- ✅ Cost-effective for personal use
+- ✅ Professional custom domain
+- ✅ Reliable performance  
+- ✅ Easy deployment process
 
 ## 🛠️ **Development Improvements**
 
@@ -348,20 +355,20 @@ mypy src/fpl_toolkit
 4. **Security audit**: Review authentication needs
 
 ### **Low Priority**
-1. **Advanced features**: ML model improvements
-2. **Social features**: League integration
-3. **Premium features**: Advanced analytics
-4. **Enterprise**: Multi-tenant architecture
+1. **Enhanced AI features**: ML model improvements
+2. **Friends integration**: Small group sharing features
+3. **iOS app preparation**: Mobile app development foundation
+4. **Historical analysis**: Multi-season data tracking
 
 ## 💡 **Conclusion**
 
-The FPL Toolkit is **production-ready** with:
+The FPL Toolkit is **production-ready** for personal use with:
 - ✅ Solid architecture and clean code
 - ✅ Comprehensive development environment
-- ✅ Multiple deployment options
+- ✅ Free hosting deployment options
 - ✅ Mobile-optimized design
 - ✅ Extensible AI capabilities
 
-**Recommended immediate action:** Run the setup script and deploy to Render for live testing.
+**Recommended immediate action:** Deploy to Railway + Cloudflare Pages with tyshub.xyz domain for personal use.
 
-The project demonstrates excellent software engineering practices and is well-positioned for growth from MVP to enterprise scale.
+The project demonstrates excellent software engineering practices and is perfectly positioned as a personal productivity tool with potential for iOS app development.

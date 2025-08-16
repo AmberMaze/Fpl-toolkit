@@ -1,17 +1,17 @@
 # FPL Toolkit
 
-A comprehensive Fantasy Premier League (FPL) analysis and decision support toolkit with AI-powered recommendations, mobile-friendly APIs, and advanced analytics.
+A personal Fantasy Premier League (FPL) analysis and optimization toolkit with AI-powered recommendations, mobile-friendly interface, and advanced analytics for individual use.
 
 ## Features
 
-- 🤖 **AI-Powered Advisor**: Intelligent team analysis and transfer recommendations
+- 🤖 **Personal AI Advisor**: Intelligent team analysis and transfer recommendations tailored to your style
 - 📊 **Advanced Analytics**: Fixture difficulty, player projections, and performance metrics
-- 📈 **Advanced Metrics**: Expected goals (xG/xA) and zone weakness adjustments for enhanced projections
-- 📱 **Mobile-Friendly API**: RESTful endpoints optimized for mobile access
-- 🗄️ **Database Integration**: SQLite fallback with optional PostgreSQL support
-- 🌐 **Modern Frontend**: Next.js web application optimized for Vercel deployment
-- 🖥️ **Streamlit Interface**: Alternative web interface with responsive design
-- ⚙️ **CLI Tools**: Command-line interface for automation and scripting
+- 📈 **Enhanced Metrics**: Expected goals (xG/xA) and zone weakness adjustments for better predictions
+- 📱 **Mobile-Optimized**: Responsive design perfect for quick checks and updates
+- 🗄️ **Smart Database**: SQLite simplicity with optional PostgreSQL for advanced features
+- 🌐 **Modern Interface**: Clean Next.js web app optimized for personal use
+- 🖥️ **Streamlit Dashboard**: Alternative interface for detailed analysis
+- ⚙️ **CLI Tools**: Command-line automation for power users
 
 ## Quick Start
 

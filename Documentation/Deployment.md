@@ -1,255 +1,244 @@
-# Deployment Guide
+# Personal Deployment Guide
 
-Complete guide for deploying the FPL Toolkit to production environments.
+Complete guide for deploying the FPL Toolkit to free hosting platforms for personal use with tyshub.xyz domain.
 
-## 🚀 Deployment Architecture
+## 🚀 Personal Deployment Strategy
 
-The FPL Toolkit uses a **dual-deployment strategy** optimized for modern cloud platforms:
+The FPL Toolkit is optimized for **free hosting solutions** perfect for personal use:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Production Setup                     │
+│                Personal Hosting Setup                   │
 ├─────────────────────────────────────────────────────────┤
-│  Frontend (Vercel)          Backend (Render/Railway)    │
-│  ┌─────────────────┐        ┌─────────────────────────┐ │
-│  │   Next.js App   │ ────── │   FastAPI + Database    │ │
-│  │   Static CDN    │        │   Auto-scaling          │ │
-│  │   Edge Runtime  │        │   Health Monitoring     │ │
-│  └─────────────────┘        └─────────────────────────┘ │
+│  Frontend (Free Hosting)        Backend (Free Hosting)  │
+│  ┌─────────────────┐           ┌─────────────────────┐  │
+│  │  tyshub.xyz     │  ──────── │   Railway/Render    │  │
+│  │  Cloudflare     │           │   Free PostgreSQL   │  │
+│  │  Vercel/Netlify │           │   Auto-deploy      │  │
+│  └─────────────────┘           └─────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## 🌐 Frontend Deployment (Next.js)
+## 🌐 Frontend Deployment Options
 
-### Vercel Deployment (Recommended)
+### Option 1: Cloudflare Pages (Recommended for tyshub.xyz)
 
-**Step 1: Repository Connection**
-1. Connect your GitHub repository to Vercel
-2. Select the `frontend` folder as the root directory
-3. Vercel auto-detects Next.js configuration
+**Why Cloudflare Pages?**
+- ✅ **Unlimited builds** (no build minute limits like Netlify)
+- ✅ **Free custom domain** (perfect for tyshub.xyz)
+- ✅ **Global CDN** with excellent performance
+- ✅ **Free SSL** certificates
+- ✅ **Edge workers** for advanced functionality
 
-**Step 2: Build Configuration**
+**Setup Steps:**
+1. **Connect Repository**: Link your GitHub repo to Cloudflare Pages
+2. **Build Configuration**:
+   ```bash
+   Build command: cd frontend && npm run build
+   Build output directory: frontend/.next
+   Root directory: frontend
+   ```
+3. **Custom Domain Setup**:
+   - In Cloudflare Pages dashboard, add custom domain: `tyshub.xyz`
+   - In Porkbun DNS settings, add CNAME record:
+     ```
+     CNAME  @  your-project.pages.dev
+     ```
+
+**Environment Variables**:
+```bash
+NEXT_PUBLIC_API_URL=https://your-backend.railway.app
+NEXT_PUBLIC_APP_NAME=FPL Toolkit
+NODE_VERSION=18
+```
+
+### Option 2: Vercel (Good alternative)
+
+**Pros**: Excellent Next.js integration, automatic deployments
+**Cons**: Build time limits on free tier (100 hours/month - should be sufficient for personal use)
+
+**Setup**:
 ```json
 {
   "framework": "nextjs",
   "rootDirectory": "frontend",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install"
+  "outputDirectory": ".next"
 }
 ```
 
-**Step 3: Environment Variables**
-```bash
-# Vercel Environment Variables
-NEXT_PUBLIC_API_URL=https://your-backend-api.render.com
-NEXT_PUBLIC_APP_NAME=FPL Toolkit
-NEXT_PUBLIC_VERSION=1.0.0
-```
+**Custom Domain (tyshub.xyz)**:
+1. Add domain in Vercel dashboard
+2. Update DNS at Porkbun:
+   ```
+   CNAME  @  cname.vercel-dns.com
+   ```
 
-**Step 4: Custom Domain (Optional)**
-- Add your custom domain in Vercel dashboard
-- Configure DNS records as instructed
-- SSL certificates are automatic
+### Option 3: Netlify (Backup option)
 
-### Alternative: Netlify Deployment
+**Limitation**: 300 build minutes/month on free tier
+**Best for**: Static sites with infrequent updates
 
-**netlify.toml** (create in frontend folder):
+**netlify.toml**:
 ```toml
 [build]
   base = "frontend"
   command = "npm run build"
   publish = ".next"
-
-[[redirects]]
-  from = "/api/*"
-  to = "https://your-backend-api.render.com/api/:splat"
-  status = 200
-
-[build.environment]
-  NEXT_PUBLIC_API_URL = "https://your-backend-api.render.com"
 ```
 
-### Docker Deployment
+## ⚡ Backend Deployment (Free Hosting)
 
-**Frontend Dockerfile**:
-```dockerfile
-FROM node:18-alpine
+### Railway (Recommended for Personal Use)
 
-WORKDIR /app
-COPY frontend/package*.json ./
-RUN npm install
+**Why Railway?**
+- ✅ **$5/month free credits** (enough for personal use)
+- ✅ **Automatic PostgreSQL** database included
+- ✅ **Zero configuration** deployment
+- ✅ **GitHub integration** with auto-deploys
+- ✅ **Better reliability** than free Render tier
 
-COPY frontend/ .
-RUN npm run build
+**Setup Steps:**
+1. **Connect Repository**:
+   ```bash
+   # Install Railway CLI (optional)
+   npm install -g @railway/cli
+   
+   # Or use web dashboard
+   # Connect GitHub repo at railway.app
+   ```
 
-EXPOSE 3000
-CMD ["npm", "start"]
-```
+2. **Configuration**:
+   Railway auto-detects Python projects. Create `railway.toml`:
+   ```toml
+   [build]
+   builder = "NIXPACKS"
+   
+   [deploy]
+   startCommand = "fpl-toolkit serve --host 0.0.0.0 --port $PORT"
+   
+   [env]
+   PYTHON_VERSION = "3.11"
+   ```
 
-## ⚡ Backend Deployment (FastAPI)
+3. **Database**: Railway automatically provides PostgreSQL
+4. **Environment Variables** (auto-configured):
+   ```bash
+   DATABASE_URL=${{Postgres.DATABASE_URL}}
+   PORT=${{PORT}}
+   CACHE_TTL_SECONDS=1800
+   ```
 
-### Render Deployment (Recommended)
+### Render (Alternative Free Option)
 
-**Step 1: Create Web Service**
-1. Connect GitHub repository to Render
-2. Select "Web Service" type
-3. Choose your repository and branch
+**Free Tier Limitations**: 
+- ✅ Free tier available
+- ⚠️ **Spins down after 15 mins** of inactivity (slow cold starts)
+- ⚠️ **750 hours/month limit** (may not be enough for always-on)
 
-**Step 2: Service Configuration**
+**Setup Only if Railway Credits Run Out**:
 ```yaml
-# render.yaml (in repository root)
+# render.yaml
 services:
   - type: web
     name: fpl-toolkit-api
     env: python
     buildCommand: pip install -e ".[web,ai,postgresql]"
     startCommand: fpl-toolkit serve --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
-      - key: DATABASE_URL
-        fromDatabase:
-          name: fpl-toolkit-db
-          property: connectionString
-      - key: CACHE_TTL_SECONDS
-        value: 1800
-
-databases:
-  - name: fpl-toolkit-db
-    databaseName: fpl_toolkit
-    user: fpl_user
-    region: oregon
+    plan: free  # Limited but functional
 ```
 
-**Step 3: Database Setup**
-```bash
-# Render automatically provides DATABASE_URL
-# Format: postgresql://user:password@host:port/database
-```
+### Fly.io (Another Alternative)
 
-**Step 4: Environment Variables**
-```bash
-DATABASE_URL=postgresql://...  # Auto-provided by Render
-CACHE_TTL_SECONDS=1800
-ENABLE_ADVANCED_METRICS=true
-PORT=8000  # Auto-provided by Render
-```
-
-### Railway Deployment
-
-**Step 1: Connect Repository**
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway new fpl-toolkit
-railway link
-railway up
-```
-
-**Step 2: Configuration**
-```json
-{
-  "build": {
-    "builder": "NIXPACKS"
-  },
-  "start": "fpl-toolkit serve --host 0.0.0.0 --port $PORT",
-  "variables": {
-    "PYTHON_VERSION": "3.11",
-    "DATABASE_URL": "${{Postgres.DATABASE_URL}}",
-    "CACHE_TTL_SECONDS": "1800"
-  }
-}
-```
-
-### Docker Deployment
-
-**Production Dockerfile**:
-```dockerfile
-FROM python:3.11-slim
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copy requirements and install Python packages
-COPY pyproject.toml .
-RUN pip install -e ".[web,ai,postgresql]"
-
-# Copy application code
-COPY src/ src/
-COPY tests/ tests/
-
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash app
-USER app
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-EXPOSE 8000
-CMD ["fpl-toolkit", "serve", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-## 🗄️ Database Deployment
-
-### PostgreSQL on Render
-
-**Automatic Setup**:
-1. Create PostgreSQL database in Render dashboard
-2. Database URL automatically provided to web service
-3. Connection pooling and backups included
-
-**Manual Configuration**:
-```sql
--- Database initialization (automatic via render.yaml)
-CREATE DATABASE fpl_toolkit;
-CREATE USER fpl_user WITH PASSWORD 'secure_password';
-GRANT ALL PRIVILEGES ON DATABASE fpl_toolkit TO fpl_user;
-```
-
-### PostgreSQL on Railway
-
-```bash
-# Add PostgreSQL plugin
-railway add postgresql
-
-# Database URL automatically available as $DATABASE_URL
-```
-
-### Supabase (Alternative)
+**Free Tier**: 
+- ✅ **3 VMs** with 256MB RAM each
+- ✅ **3GB storage** included
+- ✅ **Always-on capability**
 
 **Setup**:
-1. Create Supabase project
-2. Get connection string from dashboard
-3. Configure environment variable
-
 ```bash
+# Install flyctl
+curl -L https://fly.io/install.sh | sh
+
+# Deploy
+fly launch
+fly deploy
+```
+
+## 🗄️ Database Options (Free)
+
+### Railway PostgreSQL (Included)
+- ✅ **Automatic with Railway** backend deployment
+- ✅ **No separate setup** required
+- ✅ **Reliable and fast**
+
+### Supabase (Alternative)
+- ✅ **500MB free database**
+- ✅ **Real-time features** (if needed later)
+- ✅ **Excellent dashboard**
+
+**Setup**:
+```bash
+# Connection string from Supabase dashboard
 DATABASE_URL=postgresql://postgres:password@db.project.supabase.co:5432/postgres
 ```
 
-## 🐳 Docker Compose Deployment
+### PlanetScale (Alternative)
+- ✅ **10GB free storage**
+- ✅ **Serverless MySQL**
+- ✅ **Branching feature** for development
 
-**docker-compose.yml** (full stack):
+## 📱 tyshub.xyz Domain Configuration
+
+### DNS Setup at Porkbun
+
+**For Cloudflare Pages (Recommended)**:
+```bash
+# In Porkbun DNS management:
+Type: CNAME
+Name: @
+Content: your-project.pages.dev
+TTL: Auto
+```
+
+**For Vercel**:
+```bash
+# In Porkbun DNS management:
+Type: CNAME  
+Name: @
+Content: cname.vercel-dns.com
+TTL: Auto
+```
+
+**Subdomain for API** (optional):
+```bash
+# If you want api.tyshub.xyz for backend
+Type: CNAME
+Name: api
+Content: your-backend.railway.app
+TTL: Auto
+```
+
+### SSL Configuration
+- **Cloudflare Pages**: Automatic SSL
+- **Vercel**: Automatic SSL  
+- **All platforms**: Free Let's Encrypt certificates
+
+## 🐳 Local Docker Development
+
+**docker-compose.yml** (for local development):
 ```yaml
 version: '3.8'
 
 services:
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
 
@@ -260,312 +249,238 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/fpl_toolkit
-      - CACHE_TTL_SECONDS=1800
-    depends_on:
-      - db
+      - DATABASE_URL=sqlite:///./fpl_toolkit.db
+      - CACHE_TTL_SECONDS=300
     volumes:
       - ./src:/app/src
 
+  # Optional: Local PostgreSQL for development
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     environment:
       - POSTGRES_DB=fpl_toolkit
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - POSTGRES_PASSWORD=dev_password
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
 ```
 
-**Deployment Commands**:
+**Run locally**:
 ```bash
-# Deploy full stack
+# Full stack development
 docker-compose up -d
 
-# Scale backend
-docker-compose up -d --scale backend=3
-
-# View logs
-docker-compose logs -f backend
-
-# Update deployment
-docker-compose pull && docker-compose up -d
+# Just backend with SQLite
+docker-compose up backend
 ```
 
 ## 🔧 Environment Configuration
 
-### Production Environment Variables
+### Personal Production Environment
 
 **Frontend (.env.production)**:
 ```bash
-NEXT_PUBLIC_API_URL=https://api.your-domain.com
-NEXT_PUBLIC_APP_NAME=FPL Toolkit
-NEXT_PUBLIC_SENTRY_DSN=https://...  # Optional monitoring
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX     # Optional analytics
+# tyshub.xyz frontend configuration
+NEXT_PUBLIC_API_URL=https://api.tyshub.xyz
+NEXT_PUBLIC_APP_NAME=Personal FPL Toolkit
+NEXT_PUBLIC_DOMAIN=tyshub.xyz
 ```
 
 **Backend (.env.production)**:
 ```bash
-# Database
-DATABASE_URL=postgresql://user:pass@host:port/db
-
-# API Configuration
+# Personal backend configuration
+DATABASE_URL=postgresql://...  # From Railway/Supabase
 CACHE_TTL_SECONDS=1800
 ENABLE_ADVANCED_METRICS=true
-MAX_WORKERS=4
 
-# Optional: External Services
-SENTRY_DSN=https://...              # Error monitoring
-REDIS_URL=redis://...               # Enhanced caching
+# Personal settings
+MAX_WORKERS=2  # Lower for personal use
+DEBUG=false
+CORS_ORIGINS=https://tyshub.xyz,https://www.tyshub.xyz
 ```
 
-### Staging Environment
+### Local Development Environment
 
-**Staging Setup**:
+**Setup for Development**:
 ```bash
-# Separate staging database
-DATABASE_URL=postgresql://user:pass@staging-host:port/fpl_toolkit_staging
-
-# Faster cache for testing
-CACHE_TTL_SECONDS=300
-
-# Debug mode
+# .env.local
+DATABASE_URL=sqlite:///./fpl_toolkit.db
+CACHE_TTL_SECONDS=300  # Faster refresh for development
 DEBUG=true
+CORS_ORIGINS=http://localhost:3000
 ```
 
-## 📊 Monitoring & Health Checks
+## 📊 Personal Monitoring
 
-### Health Endpoints
+### Free Monitoring Options
 
-**Backend Health Check**:
-```http
-GET /health
+**UptimeRobot** (Free tier):
+- ✅ **50 monitors free**
+- ✅ **5-minute interval**
+- ✅ **Email/SMS alerts**
 
-Response:
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "database": "connected",
-  "cache": "operational"
-}
-```
-
-**Frontend Health Check**:
-```http
-GET /api/health
-
-Response:
-{
-  "status": "ok",
-  "backend_api": "connected",
-  "build_time": "2024-01-15T10:00:00Z"
-}
-```
-
-### Monitoring Setup
-
-**Uptime Monitoring** (UptimeRobot):
+**Setup**:
 ```bash
 # Monitor these endpoints
-https://your-frontend.vercel.app/api/health
-https://your-backend.render.com/health
+https://tyshub.xyz/api/health
+https://your-backend.railway.app/health
 ```
 
-**Error Tracking** (Sentry):
+**BetterUptime** (Alternative):
+- ✅ **10 monitors free**
+- ✅ **1-minute interval**
+- ✅ **Status page included**
+
+### Simple Health Checks
+
+**Backend Health**:
+```http
+GET /health
+Response: {"status": "healthy", "database": "connected"}
+```
+
+**Frontend Health**:
+```http
+GET /api/health  
+Response: {"status": "ok", "backend_api": "connected"}
+```
+
+## 🚀 Personal Deployment Workflow
+
+### Recommended Setup Process
+
+1. **Backend First** (Railway):
+   ```bash
+   # Connect GitHub repo to Railway
+   # Railway auto-deploys on push to main
+   # Note the provided URL: https://your-app.railway.app
+   ```
+
+2. **Frontend Second** (Cloudflare Pages):
+   ```bash
+   # Connect GitHub repo to Cloudflare Pages
+   # Set environment: NEXT_PUBLIC_API_URL=https://your-app.railway.app
+   # Connect custom domain: tyshub.xyz
+   ```
+
+3. **DNS Configuration** (Porkbun):
+   ```bash
+   # CNAME @ -> your-project.pages.dev
+   # Optional: CNAME api -> your-app.railway.app
+   ```
+
+### Automated Deployment
+
+**GitHub Actions** (optional, for advanced users):
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Personal Hosting
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Railway
+        run: |
+          # Railway auto-deploys via webhook
+          echo "Railway handles backend deployment"
+      - name: Deploy to Cloudflare Pages
+        run: |
+          # Cloudflare Pages auto-deploys via GitHub integration
+          echo "Cloudflare Pages handles frontend deployment"
+```
+
+## 🔒 Personal Security
+
+### Basic Security Setup
+
+**HTTPS Everywhere**:
+- ✅ Cloudflare Pages: Automatic HTTPS
+- ✅ Railway: Automatic SSL
+- ✅ Custom domain: Automatic certificates
+
+**Environment Security**:
+```bash
+# Never commit these to GitHub
+DATABASE_URL=...
+API_KEYS=...
+
+# Use platform environment variables instead
+```
+
+**Rate Limiting** (for personal use):
 ```python
-# Backend integration
-import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-
-sentry_sdk.init(
-    dsn="YOUR_SENTRY_DSN",
-    integrations=[FastApiIntegration()]
-)
-```
-
-```javascript
-// Frontend integration
-import * as Sentry from "@sentry/nextjs";
-
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-});
-```
-
-## 🚀 Performance Optimization
-
-### CDN Configuration
-
-**Vercel (Automatic)**:
-- Global edge distribution
-- Automatic image optimization
-- Brotli compression
-
-**Custom CDN (CloudFlare)**:
-```javascript
-// next.config.js
-module.exports = {
-  images: {
-    domains: ['your-cdn.cloudflare.com'],
-  },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
-};
-```
-
-### Database Optimization
-
-**Connection Pooling**:
-```python
-# Production database settings
-DATABASE_URL=postgresql://user:pass@host:port/db?pool_size=20&max_overflow=30
-```
-
-**Query Optimization**:
-```sql
--- Add indexes for common queries
-CREATE INDEX idx_players_position ON players(position);
-CREATE INDEX idx_gameweek_history_player_gw ON gameweek_history(player_id, gameweek);
-CREATE INDEX idx_projections_player_gw ON projections(player_id, gameweek);
-```
-
-## 🔒 Security Configuration
-
-### HTTPS & SSL
-
-**Vercel**: Automatic HTTPS with custom domains
-**Render**: Automatic SSL certificates
-**Custom**: Use Let's Encrypt or CloudFlare
-
-### CORS Configuration
-
-```python
-# Production CORS settings
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://your-frontend.vercel.app"],
-    allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
-```
-
-### Rate Limiting
-
-```python
-# Production rate limiting
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter
-
-@app.get("/players")
-@limiter.limit("60/minute")
+# Gentle rate limiting for personal usage
+@limiter.limit("300/minute")  # Generous for personal use
 async def get_players(request: Request):
-    # Implementation
     pass
 ```
 
-## 📋 Deployment Checklist
+## 📋 Personal Deployment Checklist
 
 ### Pre-Deployment
-- [ ] Update version numbers
-- [ ] Run full test suite
-- [ ] Test on staging environment
-- [ ] Backup existing data
-- [ ] Review environment variables
+- [ ] Test locally with `docker-compose up`
+- [ ] Verify environment variables
+- [ ] Test with sample FPL data
+- [ ] Check mobile responsiveness
 
-### Backend Deployment
-- [ ] Deploy database migrations
-- [ ] Deploy backend service
-- [ ] Verify health endpoints
-- [ ] Test API functionality
-- [ ] Monitor error rates
-
-### Frontend Deployment
-- [ ] Update API endpoints
-- [ ] Deploy frontend application
-- [ ] Test user flows
-- [ ] Verify mobile responsiveness
-- [ ] Check performance metrics
+### Deployment Steps
+- [ ] Deploy backend to Railway
+- [ ] Verify backend health endpoint
+- [ ] Deploy frontend to Cloudflare Pages
+- [ ] Configure tyshub.xyz domain
+- [ ] Test full application flow
 
 ### Post-Deployment
-- [ ] Monitor application metrics
-- [ ] Verify all integrations
-- [ ] Test critical user paths
-- [ ] Update documentation
-- [ ] Notify users of updates
+- [ ] Set up basic monitoring (UptimeRobot)
+- [ ] Test from different devices
+- [ ] Verify SSL certificates
+- [ ] Create backup of database connection info
 
-## 🆘 Troubleshooting
+## 🆘 Personal Troubleshooting
 
 ### Common Issues
 
-**Build Failures**:
+**Domain Not Working**:
 ```bash
-# Clear cache and rebuild
-npm ci
-npm run build
+# Check DNS propagation
+dig tyshub.xyz
+nslookup tyshub.xyz
 
-# Check Node.js version
-node --version  # Should be 18+
+# Verify CNAME in Porkbun dashboard
+```
+
+**API Connection Issues**:
+```bash
+# Test backend directly
+curl https://your-app.railway.app/health
+
+# Check CORS settings
+curl -H "Origin: https://tyshub.xyz" -X OPTIONS https://your-app.railway.app/players
 ```
 
 **Database Connection**:
 ```bash
-# Test connection
+# Test database connection
 psql $DATABASE_URL -c "SELECT 1;"
-
-# Check environment variables
-echo $DATABASE_URL
 ```
 
-**API Connectivity**:
-```bash
-# Test health endpoint
-curl https://your-api.render.com/health
+### Quick Fixes
 
-# Check CORS configuration
-curl -H "Origin: https://your-frontend.vercel.app" \
-     -H "Access-Control-Request-Method: GET" \
-     -X OPTIONS https://your-api.render.com/players
-```
-
-### Rollback Procedures
-
-**Frontend Rollback**:
-```bash
-# Vercel: Use dashboard to rollback to previous deployment
-# Or redeploy specific commit
-vercel --prod --force
-```
-
-**Backend Rollback**:
-```bash
-# Render: Use dashboard to rollback
-# Or deploy specific commit
-git checkout previous-working-commit
-git push origin main
-```
+**Backend Down**: Railway free tier may pause - visit URL to wake up
+**Slow Loading**: Clear CDN cache in Cloudflare dashboard
+**Build Failed**: Check Node.js version (18+) and dependencies
 
 ---
 
-*For ongoing maintenance and updates, see [Best Practices](./Best-Practices.md). For troubleshooting, see [Troubleshooting](./Troubleshooting.md).*
+*This deployment guide focuses on free hosting solutions perfect for personal use. The tyshub.xyz domain provides a professional touch while keeping costs minimal. For iOS app preparation, the API structure is ready for mobile development.*
