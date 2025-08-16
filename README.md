@@ -9,7 +9,8 @@ A comprehensive Fantasy Premier League (FPL) analysis and decision support toolk
 - 📈 **Advanced Metrics**: Expected goals (xG/xA) and zone weakness adjustments for enhanced projections
 - 📱 **Mobile-Friendly API**: RESTful endpoints optimized for mobile access
 - 🗄️ **Database Integration**: SQLite fallback with optional PostgreSQL support
-- 🌐 **Web Interface**: Streamlit app with responsive design
+- 🌐 **Modern Frontend**: Next.js web application optimized for Vercel deployment
+- 🖥️ **Streamlit Interface**: Alternative web interface with responsive design
 - ⚙️ **CLI Tools**: Command-line interface for automation and scripting
 
 ## Quick Start
@@ -137,6 +138,41 @@ fpl-toolkit serve --reload
 # Production
 uvicorn fpl_toolkit.service.api:app --host 0.0.0.0 --port 8000
 ```
+
+## Frontend (Next.js)
+
+A modern React frontend is available in the `frontend/` directory, optimized for Vercel deployment.
+
+### Quick Start
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The frontend will be available at `http://localhost:3000`
+
+### Features
+
+- 🎨 **Modern UI** with Tailwind CSS and FPL-themed design
+- 📱 **Responsive Design** optimized for mobile and desktop
+- 🤖 **AI Integration** with the Python backend API
+- ⚡ **Fast Performance** with Next.js 14 and App Router
+- 🚀 **Vercel Ready** with optimized deployment configuration
+
+### Deployment to Vercel
+
+1. **Connect Repository to Vercel**
+2. **Set Environment Variable**: `NEXT_PUBLIC_API_URL=https://your-backend-api.render.com`
+3. **Auto-Deploy**: Pushes to main branch automatically deploy
+
+See `frontend/README.md` for detailed setup and deployment instructions.
 
 ### Key Endpoints
 

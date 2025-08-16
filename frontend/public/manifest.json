@@ -1,0 +1,16 @@
+{
+  "name": "FPL Toolkit",
+  "short_name": "FPL Toolkit",
+  "description": "Fantasy Premier League analysis and decision support toolkit",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#38ef7d",
+  "theme_color": "#38ef7d",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
