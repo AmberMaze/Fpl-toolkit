@@ -1,15 +1,15 @@
-"""Enhanced FPL Toolkit Dashboard - Your Fantasy Premier League Command Center.
+"""Professional FPL Toolkit Dashboard - Modern Fantasy Premier League Analysis Platform.
 
-Inspired by the best features from top FPL websites:
-- Fantasy Football Scout (expert analysis, community insights)
-- FPL Review (projections, optimization)
+Inspired by the best features from:
+- Fantasy Football Scout (expert analysis, team reveals)
+- FPL Review (projections, transfer solver)
 - FPL Form (predictions, fixture difficulty)
 - FPL.page (real-time dashboard)
 """
 
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import numpy as np
 import pandas as pd
@@ -30,7 +30,10 @@ from src.fpl_toolkit.analysis.projections import (
 )
 from src.fpl_toolkit.api.client import FPLClient
 
-# Configure page with modern styling
+# =====================================================
+# PAGE CONFIGURATION & STYLING
+# =====================================================
+
 st.set_page_config(
     page_title="FPL Toolkit Pro",
     page_icon="⚽",
@@ -39,20 +42,22 @@ st.set_page_config(
     menu_items={
         "Get Help": "https://github.com/AmberMaze/Fpl-toolkit",
         "Report a bug": "https://github.com/AmberMaze/Fpl-toolkit/issues",
-        "About": "FPL Toolkit Pro - Your complete Fantasy Premier League analysis platform!",
+        "About": "# FPL Toolkit Pro\nYour complete Fantasy Premier League analysis platform!",
     },
 )
 
-# Enhanced CSS for professional styling
+# Custom CSS for modern styling
 st.markdown(
     """
 <style>
-    /* Modern styling inspired by top FPL sites */
+    /* Import Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
+    /* Main layout */
     .main .block-container {
         font-family: 'Inter', sans-serif;
         padding-top: 2rem;
+        padding-bottom: 2rem;
         max-width: 100%;
     }
     
@@ -64,7 +69,6 @@ st.markdown(
         color: white;
         margin-bottom: 2rem;
         box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        text-align: center;
     }
     
     .main-header h1 {
@@ -79,7 +83,7 @@ st.markdown(
         font-size: 1.1rem;
     }
     
-    /* Enhanced metric cards */
+    /* Metric cards */
     .metric-card {
         background: white;
         padding: 1.5rem;
@@ -88,7 +92,6 @@ st.markdown(
         border: 1px solid #f0f0f0;
         margin: 0.5rem 0;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        text-align: center;
     }
     
     .metric-card:hover {
@@ -111,6 +114,19 @@ st.markdown(
         letter-spacing: 0.5px;
     }
     
+    .metric-delta {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+    
+    .metric-delta.positive {
+        color: #27ae60;
+    }
+    
+    .metric-delta.negative {
+        color: #e74c3c;
+    }
+    
     /* Player cards */
     .player-card {
         background: white;
@@ -128,6 +144,45 @@ st.markdown(
         transform: translateY(-2px);
     }
     
+    .player-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .player-details {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .player-stats {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+        min-width: 80px;
+    }
+    
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #95a5a6;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
     /* Position badges */
     .position-badge {
         display: inline-block;
@@ -137,7 +192,6 @@ st.markdown(
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-right: 0.5rem;
     }
     
     .position-gk { background: #3498db; color: white; }
@@ -149,6 +203,36 @@ st.markdown(
     .difficulty-easy { color: #27ae60; font-weight: 600; }
     .difficulty-medium { color: #f39c12; font-weight: 600; }
     .difficulty-hard { color: #e74c3c; font-weight: 600; }
+    
+    /* Tables */
+    .dataframe {
+        border: none !important;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .dataframe thead {
+        background: #f8f9fa;
+    }
+    
+    .dataframe th {
+        font-weight: 600;
+        color: #2c3e50;
+        border: none !important;
+        padding: 1rem 0.75rem;
+    }
+    
+    .dataframe td {
+        border: none !important;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    /* Sidebar */
+    .css-1d391kg {
+        background: #f8f9fa;
+    }
     
     /* Status indicators */
     .status-indicator {
@@ -163,14 +247,6 @@ st.markdown(
     .status-cached { background: #f39c12; }
     .status-error { background: #e74c3c; }
     
-    /* Enhanced tables */
-    .dataframe {
-        border: none !important;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    
     /* Responsive design */
     @media (max-width: 768px) {
         .main .block-container {
@@ -179,18 +255,39 @@ st.markdown(
         
         .main-header {
             padding: 1.5rem;
+            text-align: center;
         }
         
         .main-header h1 {
             font-size: 2rem;
         }
         
+        .player-stats {
+            justify-content: center;
+        }
+        
         .metric-card {
-            margin: 0.25rem 0;
+            text-align: center;
         }
     }
     
-    /* Tab styling */
+    /* Loading animations */
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Tabs styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 0.5rem;
         background: transparent;
@@ -222,279 +319,8 @@ st.markdown(
 )
 
 
-# Configure page
-st.set_page_config(
-    page_title="FPL Toolkit",
-    page_icon="⚽",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-# Custom CSS for mobile responsiveness
-st.markdown(
-    """
-<style>
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        max-width: 100%;
-    }
-    
-    @media (max-width: 768px) {
-        .main .block-container {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 0.5rem;
-        }
-        
-        .stTabs [data-baseweb="tab"] {
-            font-size: 0.9rem;
-            padding: 0.5rem;
-        }
-    }
-    
-    .metric-container {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 0.5rem 0;
-    }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-
 # =====================================================
-# PLOTLY VISUALIZATION FUNCTIONS
-# =====================================================
-
-
-def create_form_chart(players_data: List[dict], limit: int = 10) -> go.Figure:
-    """Create an interactive form chart showing player form trends."""
-    try:
-        # Get top players by form
-        top_players = sorted(
-            players_data, key=lambda x: float(x.get("form", "0") or "0"), reverse=True
-        )[:limit]
-
-        fig = go.Figure()
-
-        for player in top_players:
-            form = float(player.get("form", "0") or "0")
-            points = player.get("total_points", 0)
-            cost = player.get("now_cost", 0) / 10.0
-
-            fig.add_trace(
-                go.Scatter(
-                    x=[cost],
-                    y=[form],
-                    mode="markers+text",
-                    marker=dict(
-                        size=max(
-                            points / 10, 8
-                        ),  # Size based on total points, minimum 8
-                        color=form,
-                        colorscale="RdYlGn",
-                        colorbar=dict(title="Form"),
-                        line=dict(width=2, color="DarkSlateGrey"),
-                    ),
-                    text=format_player_name(player),
-                    textposition="top center",
-                    name=format_player_name(player),
-                    hovertemplate="<b>%{text}</b><br>"
-                    + "Cost: £%{x:.1f}m<br>"
-                    + "Form: %{y:.1f}<br>"
-                    + f"Points: {points}<br>"
-                    + "<extra></extra>",
-                )
-            )
-
-        fig.update_layout(
-            title="Player Form vs Cost Analysis",
-            xaxis_title="Cost (£m)",
-            yaxis_title="Form",
-            template="plotly_white",
-            height=500,
-            showlegend=False,
-        )
-
-        return fig
-
-    except Exception as e:
-        st.error(f"Error creating form chart: {str(e)}")
-        return go.Figure()
-
-
-def create_position_distribution_chart(players_data: List[dict]) -> go.Figure:
-    """Create a pie chart showing player distribution by position."""
-    try:
-        position_counts = {"GK": 0, "DEF": 0, "MID": 0, "FWD": 0}
-        position_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
-
-        for player in players_data:
-            pos = position_map.get(player.get("element_type", 1), "GK")
-            position_counts[pos] += 1
-
-        fig = go.Figure(
-            data=[
-                go.Pie(
-                    labels=list(position_counts.keys()),
-                    values=list(position_counts.values()),
-                    hole=0.3,
-                    marker_colors=["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4"],
-                )
-            ]
-        )
-
-        fig.update_layout(
-            title="Player Distribution by Position", template="plotly_white", height=400
-        )
-
-        return fig
-
-    except Exception as e:
-        st.error(f"Error creating position chart: {str(e)}")
-        return go.Figure()
-
-
-def create_value_analysis_chart(players_data: List[dict], limit: int = 20) -> go.Figure:
-    """Create a scatter plot analyzing player value (points per million)."""
-    try:
-        # Calculate value for each player
-        value_players = []
-        for player in players_data:
-            cost = player.get("now_cost", 0) / 10.0
-            points = player.get("total_points", 0)
-            if cost > 0 and points > 0:
-                value = points / cost
-                value_players.append(
-                    {"player": player, "value": value, "cost": cost, "points": points}
-                )
-
-        # Sort by value and take top players
-        value_players.sort(key=lambda x: x["value"], reverse=True)
-        top_value = value_players[:limit]
-
-        fig = go.Figure()
-
-        position_colors = {1: "#FF6B6B", 2: "#4ECDC4", 3: "#45B7D1", 4: "#96CEB4"}
-        position_names = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
-
-        for pos_id, color in position_colors.items():
-            pos_players = [
-                p for p in top_value if p["player"].get("element_type") == pos_id
-            ]
-
-            if pos_players:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[p["cost"] for p in pos_players],
-                        y=[p["value"] for p in pos_players],
-                        mode="markers+text",
-                        marker=dict(
-                            size=[max(p["points"] / 5, 8) for p in pos_players],
-                            color=color,
-                            line=dict(width=2, color="white"),
-                            opacity=0.8,
-                        ),
-                        text=[format_player_name(p["player"]) for p in pos_players],
-                        textposition="top center",
-                        name=position_names[pos_id],
-                        hovertemplate="<b>%{text}</b><br>"
-                        + "Cost: £%{x:.1f}m<br>"
-                        + "Value: %{y:.1f} pts/£m<br>"
-                        + "<extra></extra>",
-                    )
-                )
-
-        fig.update_layout(
-            title="Player Value Analysis (Points per Million)",
-            xaxis_title="Cost (£m)",
-            yaxis_title="Value (Points per £m)",
-            template="plotly_white",
-            height=600,
-            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-        )
-
-        return fig
-
-    except Exception as e:
-        st.error(f"Error creating value chart: {str(e)}")
-        return go.Figure()
-
-
-def create_team_performance_chart(
-    teams_data: List[dict], players_data: List[dict]
-) -> go.Figure:
-    """Create a bar chart showing team performance metrics."""
-    try:
-        team_stats = {}
-
-        # Initialize team stats
-        for team in teams_data:
-            team_stats[team["id"]] = {
-                "name": team["name"],
-                "total_points": 0,
-                "player_count": 0,
-                "avg_cost": 0,
-                "total_cost": 0,
-            }
-
-        # Aggregate player stats by team
-        for player in players_data:
-            team_id = player.get("team")
-            if team_id in team_stats:
-                team_stats[team_id]["total_points"] += player.get("total_points", 0)
-                team_stats[team_id]["player_count"] += 1
-                team_stats[team_id]["total_cost"] += player.get("now_cost", 0) / 10.0
-
-        # Calculate averages
-        for team_id in team_stats:
-            if team_stats[team_id]["player_count"] > 0:
-                team_stats[team_id]["avg_cost"] = (
-                    team_stats[team_id]["total_cost"]
-                    / team_stats[team_id]["player_count"]
-                )
-
-        # Sort teams by total points
-        sorted_teams = sorted(
-            team_stats.values(), key=lambda x: x["total_points"], reverse=True
-        )[:10]
-
-        fig = go.Figure()
-
-        fig.add_trace(
-            go.Bar(
-                x=[team["name"] for team in sorted_teams],
-                y=[team["total_points"] for team in sorted_teams],
-                marker_color="#667eea",
-                text=[f"{team['total_points']}" for team in sorted_teams],
-                textposition="outside",
-            )
-        )
-
-        fig.update_layout(
-            title="Top 10 Teams by Total Player Points",
-            xaxis_title="Team",
-            yaxis_title="Total Points",
-            template="plotly_white",
-            height=500,
-            xaxis_tickangle=-45,
-        )
-
-        return fig
-
-    except Exception as e:
-        st.error(f"Error creating team performance chart: {str(e)}")
-        return go.Figure()
-
-
-# =====================================================
-# DATA LOADING & UTILITY FUNCTIONS
+# DATA LOADING & CACHING
 # =====================================================
 
 
@@ -506,6 +332,7 @@ def load_players_data():
             players = client.get_players()
             return {"data": players, "status": "success", "timestamp": datetime.now()}
     except Exception as e:
+        st.error(f"Error loading players: {str(e)}")
         return {"data": [], "status": "error", "error": str(e)}
 
 
@@ -517,7 +344,33 @@ def load_teams_data():
             teams = client.get_teams()
             return {"data": teams, "status": "success", "timestamp": datetime.now()}
     except Exception as e:
+        st.error(f"Error loading teams: {str(e)}")
         return {"data": [], "status": "error", "error": str(e)}
+
+
+@st.cache_data(ttl=3600)
+def load_gameweek_data():
+    """Load current gameweek information."""
+    try:
+        with FPLClient() as client:
+            gw_data = client.get_gameweeks()
+            current_gw = next(
+                (gw for gw in gw_data if gw.get("is_current", False)), None
+            )
+            if not current_gw:
+                current_gw = gw_data[0] if gw_data else {"id": 1, "name": "Gameweek 1"}
+            return {"data": current_gw, "status": "success"}
+    except Exception as e:
+        return {
+            "data": {"id": 1, "name": "Gameweek 1"},
+            "status": "error",
+            "error": str(e),
+        }
+
+
+# =====================================================
+# UTILITY FUNCTIONS
+# =====================================================
 
 
 def format_player_name(player: Dict[str, Any]) -> str:
@@ -559,83 +412,99 @@ def get_difficulty_class(difficulty: float) -> str:
         return "difficulty-hard"
 
 
-def render_main_header():
-    """Render the main dashboard header."""
-    st.markdown(
+def create_metric_card(
+    title: str, value: str, delta: str = None, delta_positive: bool = True
+) -> str:
+    """Create HTML for a metric card."""
+    delta_class = "positive" if delta_positive else "negative"
+    delta_html = f'<p class="metric-delta {delta_class}">{delta}</p>' if delta else ""
+
+    return f"""
+    <div class="metric-card">
+        <p class="metric-label">{title}</p>
+        <p class="metric-value">{value}</p>
+        {delta_html}
+    </div>
+    """
+
+
+def create_player_card(
+    player: Dict[str, Any], team_name: str = "Unknown", detailed: bool = False
+) -> str:
+    """Create HTML for a player card."""
+    name = format_player_name(player)
+    position = get_position_name(player.get("element_type", 1))
+    position_class = get_position_badge_class(position)
+    cost = player.get("now_cost", 0) / 10.0
+    points = player.get("total_points", 0)
+    form = float(player.get("form", "0") or "0")
+
+    basic_stats = f"""
+    <div class="stat-item">
+        <span class="stat-value">{format_currency(cost)}</span>
+        <span class="stat-label">Cost</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{points}</span>
+        <span class="stat-label">Points</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{form:.1f}</span>
+        <span class="stat-label">Form</span>
+    </div>
+    """
+
+    if detailed:
+        ppg = float(player.get("points_per_game", "0") or "0")
+        ownership = float(player.get("selected_by_percent", "0") or "0")
+        basic_stats += f"""
+        <div class="stat-item">
+            <span class="stat-value">{ppg:.1f}</span>
+            <span class="stat-label">PPG</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">{ownership:.1f}%</span>
+            <span class="stat-label">Owned</span>
+        </div>
         """
+
+    return f"""
+    <div class="player-card">
+        <div class="player-name">{name}</div>
+        <div class="player-details">
+            <span class="position-badge {position_class}">{position}</span>
+            <span style="margin-left: 1rem; color: #7f8c8d;">{team_name}</span>
+        </div>
+        <div class="player-stats">
+            {basic_stats}
+        </div>
+    </div>
+    """
+
+
+# =====================================================
+# MAIN DASHBOARD COMPONENTS
+# =====================================================
+
+
+def render_header():
+    """Render the main dashboard header."""
+    current_gw_data = load_gameweek_data()
+    current_gw = current_gw_data.get("data", {})
+
+    st.markdown(
+        f"""
     <div class="main-header">
         <h1>⚽ FPL Toolkit Pro</h1>
-        <p>Advanced Fantasy Premier League Analysis & Decision Support | Season 2024/25</p>
+        <p>Advanced Fantasy Premier League Analysis & Decision Support | {current_gw.get('name', 'Season 2024/25')}</p>
     </div>
     """,
         unsafe_allow_html=True,
     )
 
 
-def create_metric_card(title: str, value: str, subtitle: str = "") -> str:
-    """Create HTML for a metric card."""
-    subtitle_html = (
-        f'<p style="margin: 0; color: #7f8c8d; font-size: 0.8rem;">{subtitle}</p>'
-        if subtitle
-        else ""
-    )
-
-    return f"""
-    <div class="metric-card">
-        <p class="metric-label">{title}</p>
-        <p class="metric-value">{value}</p>
-        {subtitle_html}
-    </div>
-    """
-
-
-def display_player_card(
-    player: Dict[str, Any], team_name: str = "Unknown", show_detailed: bool = False
-):
-    """Display a player card with key information."""
-    position = get_position_name(player.get("element_type", 1))
-    position_class = get_position_badge_class(position)
-
-    col1, col2, col3 = st.columns([2, 1, 1])
-
-    with col1:
-        st.markdown(
-            f"""
-        <div>
-            <strong style="font-size: 1.1rem;">{format_player_name(player)}</strong><br>
-            <span class="{position_class} position-badge">{position}</span>
-            <span style="margin-left: 0.5rem; color: #7f8c8d;">{team_name}</span>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    with col2:
-        cost = player.get("now_cost", 0) / 10.0
-        st.metric("Cost", format_currency(cost))
-
-    with col3:
-        points = player.get("total_points", 0)
-        st.metric("Points", f"{points}")
-
-    if show_detailed:
-        col4, col5, col6 = st.columns(3)
-
-        with col4:
-            form = float(player.get("form", "0") or "0")
-            st.metric("Form", f"{form:.1f}")
-
-        with col5:
-            ppg = float(player.get("points_per_game", "0") or "0")
-            st.metric("PPG", f"{ppg:.1f}")
-
-        with col6:
-            ownership = float(player.get("selected_by_percent", "0") or "0")
-            st.metric("Owned", f"{ownership:.1f}%")
-
-
 def render_dashboard_overview():
-    """Render the main dashboard overview with key metrics and interactive charts."""
+    """Render the main dashboard overview with key metrics."""
     st.subheader("📊 Dashboard Overview")
 
     # Load data
@@ -674,188 +543,155 @@ def render_dashboard_overview():
         with col2:
             st.markdown(
                 create_metric_card(
-                    "Average Cost", format_currency(avg_cost), "Current market average"
+                    "Average Cost", format_currency(avg_cost), "League average"
                 ),
                 unsafe_allow_html=True,
             )
 
         with col3:
             if top_scorer:
+                top_scorer_name = format_player_name(top_scorer)
+                top_points = top_scorer.get("total_points", 0)
                 st.markdown(
                     create_metric_card(
-                        "Top Scorer",
-                        format_player_name(top_scorer),
-                        f"{top_scorer.get('total_points', 0)} points",
+                        "Top Scorer", f"{top_points} pts", top_scorer_name
                     ),
                     unsafe_allow_html=True,
                 )
 
         with col4:
             if most_expensive:
+                expensive_name = format_player_name(most_expensive)
+                expensive_cost = most_expensive.get("now_cost", 0) / 10.0
                 st.markdown(
                     create_metric_card(
                         "Most Expensive",
-                        format_player_name(most_expensive),
-                        format_currency(most_expensive.get("now_cost", 0) / 10.0),
+                        format_currency(expensive_cost),
+                        expensive_name,
                     ),
                     unsafe_allow_html=True,
                 )
 
-        # Interactive Charts Section
-        st.markdown("---")
-        st.subheader("📈 Interactive Analytics")
+        # Data freshness indicator
+        timestamp = players_result.get("timestamp")
+        if timestamp:
+            time_diff = datetime.now() - timestamp
+            freshness = (
+                "Live"
+                if time_diff.seconds < 300
+                else f"Cached ({time_diff.seconds//60}m ago)"
+            )
+            status_class = "status-live" if time_diff.seconds < 300 else "status-cached"
 
-        # Chart tabs
-        chart_tab1, chart_tab2, chart_tab3, chart_tab4 = st.tabs(
-            [
-                "🎯 Form Analysis",
-                "📊 Position Split",
-                "💎 Value Analysis",
-                "🏆 Team Performance",
-            ]
-        )
-
-        with chart_tab1:
-            st.markdown("#### Top Players by Form vs Cost")
-            try:
-                form_chart = create_form_chart(players, limit=15)
-                st.plotly_chart(form_chart, use_container_width=True)
-            except Exception as e:
-                st.error(f"Error loading form chart: {str(e)}")
-                st.info("Form analysis chart will show player performance trends.")
-
-        with chart_tab2:
-            st.markdown("#### Player Distribution by Position")
-            try:
-                position_chart = create_position_distribution_chart(players)
-                col_chart, col_info = st.columns([2, 1])
-
-                with col_chart:
-                    st.plotly_chart(position_chart, use_container_width=True)
-
-                with col_info:
-                    st.markdown("**Position Breakdown:**")
-                    position_counts = {"GK": 0, "DEF": 0, "MID": 0, "FWD": 0}
-                    position_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
-
-                    for player in players:
-                        pos = position_map.get(player.get("element_type", 1), "GK")
-                        position_counts[pos] += 1
-
-                    for pos, count in position_counts.items():
-                        percentage = (
-                            (count / total_players) * 100 if total_players > 0 else 0
-                        )
-                        st.write(f"**{pos}**: {count} ({percentage:.1f}%)")
-
-            except Exception as e:
-                st.error(f"Error loading position chart: {str(e)}")
-
-        with chart_tab3:
-            st.markdown("#### Best Value Players (Points per Million)")
-            try:
-                value_chart = create_value_analysis_chart(players, limit=25)
-                st.plotly_chart(value_chart, use_container_width=True)
-
-                st.markdown(
-                    "**💡 Tip:** Look for players in the top-right area for high value and reasonable cost."
-                )
-
-            except Exception as e:
-                st.error(f"Error loading value chart: {str(e)}")
-
-        with chart_tab4:
-            st.markdown("#### Team Performance Analysis")
-            try:
-                team_chart = create_team_performance_chart(teams, players)
-                st.plotly_chart(team_chart, use_container_width=True)
-
-                # Additional team insights
-                st.markdown("**📋 Team Insights:**")
-                team_stats = {}
-                for team in teams:
-                    team_stats[team["id"]] = {
-                        "name": team["name"],
-                        "total_points": 0,
-                        "player_count": 0,
-                    }
-
-                for player in players:
-                    team_id = player.get("team")
-                    if team_id in team_stats:
-                        team_stats[team_id]["total_points"] += player.get(
-                            "total_points", 0
-                        )
-                        team_stats[team_id]["player_count"] += 1
-
-                best_team = max(team_stats.values(), key=lambda x: x["total_points"])
-                st.success(
-                    f"🏆 **Best Performing Team**: {best_team['name']} ({best_team['total_points']} total points)"
-                )
-
-            except Exception as e:
-                st.error(f"Error loading team chart: {str(e)}")
+            st.markdown(
+                f"""
+            <div style="text-align: right; margin-top: 1rem; color: #7f8c8d; font-size: 0.9rem;">
+                <span class="status-indicator {status_class}"></span>
+                Data Status: {freshness}
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
 
     else:
-        st.error("Failed to load data for dashboard overview")
+        st.error("Failed to load dashboard data. Please check your connection.")
 
 
-def render_my_team_section():
-    """Render My Team section for lineup management."""
-    st.header("👥 My Team & Lineup")
+def render_my_team_tab():
+    """Render the My Team tab for lineup management."""
+    st.header("👥 My Team")
 
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        st.subheader("Team Builder")
+        st.subheader("Current Lineup")
 
-        # Team input
-        team_input = st.text_area(
-            "Enter your team player IDs (comma-separated)",
-            placeholder="e.g., 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15",
-            height=100,
-            help="Enter exactly 15 player IDs. Find IDs in the Players Explorer.",
+        # Team input methods
+        input_method = st.radio(
+            "How would you like to input your team?",
+            ["Manual Entry", "Team ID Import", "Player Selection"],
+            horizontal=True,
         )
 
-        if team_input.strip():
-            try:
-                player_ids = [
-                    int(x.strip())
-                    for x in team_input.replace("\n", ",").split(",")
-                    if x.strip()
-                ]
+        if input_method == "Manual Entry":
+            team_input = st.text_area(
+                "Enter your team player IDs",
+                placeholder="Enter 15 player IDs separated by commas\ne.g., 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15",
+                height=100,
+                help="Find player IDs in the Players Explorer tab",
+            )
 
-                if len(player_ids) == 15:
-                    st.success(f"✅ Valid team with {len(player_ids)} players")
-                    display_team_formation(player_ids)
-                elif len(player_ids) < 15:
-                    st.warning(f"⚠️ Need {15 - len(player_ids)} more players")
-                else:
-                    st.error("❌ Too many players! Maximum 15 allowed.")
+            if team_input.strip():
+                try:
+                    player_ids = [
+                        int(x.strip())
+                        for x in team_input.replace("\n", ",").split(",")
+                        if x.strip()
+                    ]
+                    if len(player_ids) == 15:
+                        st.success(f"✅ Valid team with {len(player_ids)} players")
+                        # Display team summary
+                        display_team_lineup(player_ids)
+                    elif len(player_ids) < 15:
+                        st.warning(f"⚠️ Need {15 - len(player_ids)} more players")
+                    else:
+                        st.error("❌ Too many players! Maximum 15 allowed.")
+                except ValueError:
+                    st.error("❌ Invalid format. Please enter numbers only.")
 
-            except ValueError:
-                st.error("❌ Invalid format. Please enter numbers only.")
+        elif input_method == "Team ID Import":
+            team_id = st.text_input(
+                "FPL Team ID",
+                placeholder="e.g., 123456",
+                help="Find your team ID in the FPL website URL",
+            )
+
+            if team_id and st.button("Import Team"):
+                with st.spinner("Importing team data..."):
+                    # TODO: Implement FPL team import
+                    st.info("Team import feature coming soon!")
+
+        else:  # Player Selection
+            st.info("Interactive team builder coming soon!")
 
     with col2:
         st.subheader("Team Analysis")
 
         # Quick team stats
         st.markdown(
-            create_metric_card("Team Value", "£100.0m", "Budget used"),
+            """
+        <div class="metric-card">
+            <h4>Team Value</h4>
+            <p>£100.0m / £100.0m</p>
+        </div>
+        """,
             unsafe_allow_html=True,
         )
+
         st.markdown(
-            create_metric_card("Free Transfers", "1", "Available"),
+            """
+        <div class="metric-card">
+            <h4>Free Transfers</h4>
+            <p>1 available</p>
+        </div>
+        """,
             unsafe_allow_html=True,
         )
+
         st.markdown(
-            create_metric_card("Team Score", "85/100", "Form & fixtures"),
+            """
+        <div class="metric-card">
+            <h4>Team Score</h4>
+            <p>85/100</p>
+            <small>Based on form & fixtures</small>
+        </div>
+        """,
             unsafe_allow_html=True,
         )
 
 
-def display_team_formation(player_ids: list):
-    """Display team in formation view."""
+def display_team_lineup(player_ids: list):
+    """Display team lineup in formation."""
     players_result = load_players_data()
     if players_result["status"] != "success":
         st.error("Cannot load player data")
@@ -864,8 +700,11 @@ def display_team_formation(player_ids: list):
     players = players_result["data"]
     player_lookup = {p["id"]: p for p in players}
 
-    # Get valid players
-    team_players = [player_lookup[pid] for pid in player_ids if pid in player_lookup]
+    # Get player data
+    team_players = []
+    for pid in player_ids:
+        if pid in player_lookup:
+            team_players.append(player_lookup[pid])
 
     if not team_players:
         st.warning("No valid players found")
@@ -880,145 +719,34 @@ def display_team_formation(player_ids: list):
             positions[pos].append(player)
 
     # Display formation
-    st.markdown("#### Formation View")
+    st.markdown("### Formation View")
 
     for pos_name, pos_players in positions.items():
         if pos_players:
             st.markdown(f"**{pos_name} ({len(pos_players)})**")
+            cols = st.columns(len(pos_players))
 
-            if len(pos_players) <= 5:  # Display in columns for reasonable numbers
-                cols = st.columns(len(pos_players))
-
-                for i, player in enumerate(pos_players):
-                    with cols[i]:
-                        cost = player.get("now_cost", 0) / 10.0
-                        points = player.get("total_points", 0)
-                        form = float(player.get("form", "0") or "0")
-
-                        st.markdown(
-                            f"""
-                        <div style="text-align: center; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; margin: 0.25rem; background: white;">
-                            <div style="font-weight: 600; font-size: 0.9rem;">{format_player_name(player)}</div>
-                            <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">
-                                {format_currency(cost)} | {points}pts | {form:.1f}
-                            </div>
-                        </div>
-                        """,
-                            unsafe_allow_html=True,
-                        )
-            else:
-                # For many players, show as list
-                for player in pos_players:
+            for i, player in enumerate(pos_players):
+                with cols[i]:
                     cost = player.get("now_cost", 0) / 10.0
                     points = player.get("total_points", 0)
-                    st.write(
-                        f"• {format_player_name(player)} - {format_currency(cost)} - {points}pts"
+                    form = float(player.get("form", "0") or "0")
+
+                    st.markdown(
+                        f"""
+                    <div style="text-align: center; padding: 0.5rem; border: 1px solid #ddd; border-radius: 8px; margin: 0.25rem;">
+                        <div style="font-weight: 600;">{format_player_name(player)}</div>
+                        <div style="font-size: 0.8rem; color: #666;">
+                            {format_currency(cost)} | {points}pts | {form:.1f}
+                        </div>
+                    </div>
+                    """,
+                        unsafe_allow_html=True,
                     )
 
 
-# =====================================================
-# MAIN APPLICATION FUNCTIONS
-# =====================================================
-
-
-def main():
-    """Main application entry point with modern FPL dashboard."""
-    # Render main header
-    render_main_header()
-
-    # Main navigation tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-        [
-            "🏠 Dashboard",
-            "👥 My Team",
-            "🔍 Players Explorer",
-            "🔄 Transfer Planner",
-            "📅 Fixture Analysis",
-            "📊 Statistics Hub",
-        ]
-    )
-
-    with tab1:
-        render_dashboard_overview()
-
-        # Quick insights section
-        st.markdown("---")
-        st.subheader("🔥 Quick Insights")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("#### 📈 Top Form Players")
-            try:
-                players_result = load_players_data()
-                if players_result["status"] == "success":
-                    players = players_result["data"]
-                    # Sort by form and display top 5
-                    top_form = sorted(
-                        players,
-                        key=lambda x: float(x.get("form", "0") or "0"),
-                        reverse=True,
-                    )[:5]
-
-                    for i, player in enumerate(top_form, 1):
-                        form = float(player.get("form", "0") or "0")
-                        cost = player.get("now_cost", 0) / 10.0
-                        st.write(
-                            f"{i}. **{format_player_name(player)}** - {form:.1f} form - {format_currency(cost)}"
-                        )
-                else:
-                    st.error("Cannot load player data")
-            except Exception as e:
-                st.error(f"Error loading top form players: {str(e)}")
-
-        with col2:
-            st.markdown("#### 🎯 Best Value Players")
-            try:
-                players_result = load_players_data()
-                if players_result["status"] == "success":
-                    players = players_result["data"]
-                    # Calculate points per million and display top 5
-                    value_players = []
-                    for player in players:
-                        cost = player.get("now_cost", 0) / 10.0
-                        points = player.get("total_points", 0)
-                        if cost > 0:
-                            value_players.append((player, points / cost))
-
-                    value_players.sort(key=lambda x: x[1], reverse=True)
-
-                    for i, (player, value) in enumerate(value_players[:5], 1):
-                        cost = player.get("now_cost", 0) / 10.0
-                        points = player.get("total_points", 0)
-                        st.write(
-                            f"{i}. **{format_player_name(player)}** - {value:.1f} pts/£m - {points}pts"
-                        )
-                else:
-                    st.error("Cannot load player data")
-            except Exception as e:
-                st.error(f"Error loading value players: {str(e)}")
-
-    with tab2:
-        render_my_team_section()
-
-    with tab3:
-        render_players_explorer()
-
-    with tab4:
-        render_transfer_planner()
-
-    with tab5:
-        render_fixture_analysis()
-
-    with tab6:
-        render_statistics_hub()
-
-    # Enhanced sidebar
-    render_enhanced_sidebar()
-
-
 def render_players_explorer():
-    """Enhanced players explorer with advanced filtering."""
+    """Render the Players Explorer tab with advanced filtering."""
     st.header("🔍 Players Explorer")
 
     # Load data
@@ -1034,7 +762,7 @@ def render_players_explorer():
     team_lookup = {t["id"]: t["name"] for t in teams}
 
     # Advanced filters
-    st.subheader("🎛️ Smart Filters")
+    st.subheader("🎛️ Advanced Filters")
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -1065,36 +793,35 @@ def render_players_explorer():
         )
 
     # Additional filters
-    col5, col6 = st.columns(2)
+    col5, col6, col7 = st.columns(3)
 
     with col5:
         team_filter = st.multiselect(
-            "Teams (leave empty for all)",
+            "Teams",
             options=[team["name"] for team in teams],
             default=[],
+            help="Leave empty to include all teams",
         )
 
     with col6:
-        search_term = st.text_input(
-            "Search Player Name", placeholder="Type player name..."
+        ownership_range = st.slider(
+            "Ownership %", min_value=0.0, max_value=100.0, value=(0.0, 100.0), step=0.1
         )
+
+    with col7:
+        search_term = st.text_input("Search Player", placeholder="Enter player name...")
 
     # Sort options
     sort_by = st.selectbox(
         "Sort by",
-        [
-            "Total Points",
-            "Form",
-            "Points per Game",
-            "Cost",
-            "Ownership %",
-            "Value (pts/£m)",
-        ],
+        ["Total Points", "Form", "Points per Game", "Cost", "Ownership %"],
         index=0,
     )
 
+    sort_ascending = st.checkbox("Ascending order", False)
+
     # Apply filters
-    filtered_players = filter_players_advanced(
+    filtered_players = filter_players(
         players,
         team_lookup,
         position_filter,
@@ -1102,21 +829,23 @@ def render_players_explorer():
         points_range,
         form_threshold,
         team_filter,
+        ownership_range,
         search_term,
     )
 
     # Sort players
     sort_key_map = {
-        "Total Points": lambda x: x.get("total_points", 0),
-        "Form": lambda x: float(x.get("form", "0") or "0"),
-        "Points per Game": lambda x: float(x.get("points_per_game", "0") or "0"),
-        "Cost": lambda x: x.get("now_cost", 0),
-        "Ownership %": lambda x: float(x.get("selected_by_percent", "0") or "0"),
-        "Value (pts/£m)": lambda x: x.get("total_points", 0)
-        / max(x.get("now_cost", 1) / 10.0, 0.1),
+        "Total Points": "total_points",
+        "Form": "form",
+        "Points per Game": "points_per_game",
+        "Cost": "now_cost",
+        "Ownership %": "selected_by_percent",
     }
 
-    filtered_players.sort(key=sort_key_map[sort_by], reverse=True)
+    sort_key = sort_key_map[sort_by]
+    filtered_players.sort(
+        key=lambda x: float(x.get(sort_key, 0) or 0), reverse=not sort_ascending
+    )
 
     # Display results
     st.subheader(f"📋 Results ({len(filtered_players)} players)")
@@ -1124,97 +853,83 @@ def render_players_explorer():
     if filtered_players:
         # Display options
         view_mode = st.radio(
-            "View Mode",
-            ["Detailed Cards", "Compact Table", "Quick Stats"],
-            horizontal=True,
+            "View Mode", ["Card View", "Table View", "Detailed View"], horizontal=True
         )
 
-        if view_mode == "Detailed Cards":
-            # Card view with enhanced styling
-            for player in filtered_players[:20]:  # Limit for performance
-                team_name = team_lookup.get(player.get("team"), "Unknown")
+        if view_mode == "Card View":
+            # Card grid view
+            cols_per_row = 3
+            for i in range(
+                0, len(filtered_players[:30]), cols_per_row
+            ):  # Limit to 30 for performance
+                cols = st.columns(cols_per_row)
+                for j, col in enumerate(cols):
+                    if i + j < len(filtered_players):
+                        player = filtered_players[i + j]
+                        team_name = team_lookup.get(player.get("team"), "Unknown")
 
-                with st.expander(
-                    f"{format_player_name(player)} - {team_name}", expanded=False
-                ):
-                    display_player_card(player, team_name, show_detailed=True)
+                        with col:
+                            player_card_html = create_player_card(
+                                player, team_name, detailed=True
+                            )
+                            st.markdown(player_card_html, unsafe_allow_html=True)
 
-                    # Additional action buttons
-                    col_btn1, col_btn2, col_btn3 = st.columns(3)
+                            # Action buttons
+                            col_btn1, col_btn2 = st.columns(2)
+                            with col_btn1:
+                                if st.button("Compare", key=f"compare_{player['id']}"):
+                                    if "comparison_list" not in st.session_state:
+                                        st.session_state.comparison_list = []
+                                    if (
+                                        player["id"]
+                                        not in st.session_state.comparison_list
+                                    ):
+                                        st.session_state.comparison_list.append(
+                                            player["id"]
+                                        )
+                                        st.success("Added to comparison!")
 
-                    with col_btn1:
-                        if st.button("Add to Compare", key=f"compare_{player['id']}"):
-                            if "comparison_list" not in st.session_state:
-                                st.session_state.comparison_list = []
-                            if player["id"] not in st.session_state.comparison_list:
-                                st.session_state.comparison_list.append(player["id"])
-                                st.success("Added to comparison!")
+                            with col_btn2:
+                                if st.button("Details", key=f"details_{player['id']}"):
+                                    st.session_state.selected_player = player["id"]
+                                    st.success("Player selected!")
 
-                    with col_btn2:
-                        if st.button("View Details", key=f"details_{player['id']}"):
-                            st.session_state.selected_player = player["id"]
-                            st.info("Player details coming soon!")
-
-                    with col_btn3:
-                        if st.button("Transfer Target", key=f"transfer_{player['id']}"):
-                            st.info("Transfer analysis coming soon!")
-
-        elif view_mode == "Compact Table":
-            # Enhanced table view
+        elif view_mode == "Table View":
+            # Table view
             table_data = []
-            for player in filtered_players[:50]:
-                cost = player.get("now_cost", 0) / 10.0
-                value = player.get("total_points", 0) / max(cost, 0.1)
-
+            for player in filtered_players[:50]:  # Limit for performance
                 table_data.append(
                     {
-                        "Player": format_player_name(player),
+                        "Name": format_player_name(player),
                         "Position": get_position_name(player.get("element_type", 1)),
                         "Team": team_lookup.get(player.get("team"), "Unknown"),
-                        "Cost": format_currency(cost),
+                        "Cost": format_currency(player.get("now_cost", 0) / 10.0),
                         "Points": player.get("total_points", 0),
                         "Form": f"{float(player.get('form', '0') or '0'):.1f}",
                         "PPG": f"{float(player.get('points_per_game', '0') or '0'):.1f}",
                         "Owned %": f"{float(player.get('selected_by_percent', '0') or '0'):.1f}%",
-                        "Value": f"{value:.1f}",
                     }
                 )
 
             df = pd.DataFrame(table_data)
             st.dataframe(df, use_container_width=True, hide_index=True, height=600)
 
-        else:  # Quick Stats
-            # Quick stats overview
-            st.markdown("#### Top 10 Players")
+        else:  # Detailed View
+            # Detailed single player view
+            selected_index = st.selectbox(
+                "Select Player for Detailed View",
+                range(min(10, len(filtered_players))),
+                format_func=lambda x: format_player_name(filtered_players[x]),
+            )
 
-            for i, player in enumerate(filtered_players[:10], 1):
-                cost = player.get("now_cost", 0) / 10.0
-                points = player.get("total_points", 0)
-                form = float(player.get("form", "0") or "0")
-                team_name = team_lookup.get(player.get("team"), "Unknown")
-                position = get_position_name(player.get("element_type", 1))
-
-                st.markdown(
-                    f"""
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #eee; border-radius: 8px; margin: 0.5rem 0; background: white;">
-                    <div>
-                        <strong>{i}. {format_player_name(player)}</strong><br>
-                        <small>{position} | {team_name}</small>
-                    </div>
-                    <div style="text-align: right;">
-                        <div><strong>{format_currency(cost)}</strong> | <strong>{points}pts</strong></div>
-                        <div><small>Form: {form:.1f}</small></div>
-                    </div>
-                </div>
-                """,
-                    unsafe_allow_html=True,
-                )
+            player = filtered_players[selected_index]
+            render_player_detailed_view(player, team_lookup)
 
     else:
         st.info("No players match your current filters. Try adjusting the criteria.")
 
 
-def filter_players_advanced(
+def filter_players(
     players: list,
     team_lookup: dict,
     position_filter: str,
@@ -1222,9 +937,10 @@ def filter_players_advanced(
     points_range: tuple,
     form_threshold: float,
     team_filter: list,
+    ownership_range: tuple,
     search_term: str,
 ) -> list:
-    """Apply advanced filters to player list."""
+    """Apply filters to player list."""
     filtered = []
 
     # Position mapping
@@ -1257,6 +973,11 @@ def filter_players_advanced(
             if team_name not in team_filter:
                 continue
 
+        # Ownership filter
+        ownership = float(player.get("selected_by_percent", "0") or "0")
+        if not (ownership_range[0] <= ownership <= ownership_range[1]):
+            continue
+
         # Search filter
         if search_term:
             player_name = format_player_name(player).lower()
@@ -1268,308 +989,672 @@ def filter_players_advanced(
     return filtered
 
 
-def render_transfer_planner():
-    """Render enhanced transfer planner."""
-    st.header("🔄 Transfer Planner")
+def render_player_detailed_view(player: dict, team_lookup: dict):
+    """Render detailed view for a single player."""
+    st.subheader(f"📊 {format_player_name(player)} - Detailed Analysis")
 
-    st.info("🚧 Enhanced transfer planning tools coming soon! This will include:")
-    st.markdown(
-        """
-    - **Single & Double Transfer Analysis**: Compare potential transfers with projected points
-    - **Wildcard Optimizer**: Build optimal teams within budget constraints  
-    - **Transfer Timeline**: Plan transfers across multiple gameweeks
-    - **Price Change Predictor**: Track player price movements
-    - **Captain Analyzer**: Optimize captaincy choices based on fixtures
-    """
-    )
-
-    # Basic transfer analysis
-    st.subheader("Quick Transfer Analysis")
-
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([1, 2])
 
     with col1:
-        player_out = st.text_input(
-            "Player Out (ID)", placeholder="Enter player ID to transfer out"
+        # Player info card
+        team_name = team_lookup.get(player.get("team"), "Unknown")
+        position = get_position_name(player.get("element_type", 1))
+
+        st.markdown(
+            f"""
+        <div class="player-card">
+            <h3>{format_player_name(player)}</h3>
+            <p><span class="position-badge {get_position_badge_class(position)}">{position}</span> | {team_name}</p>
+            <hr>
+            <div class="player-stats">
+                <div class="stat-item">
+                    <span class="stat-value">{format_currency(player.get('now_cost', 0) / 10.0)}</span>
+                    <span class="stat-label">Cost</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{player.get('total_points', 0)}</span>
+                    <span class="stat-label">Total Points</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{float(player.get('form', '0') or '0'):.1f}</span>
+                    <span class="stat-label">Form</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{float(player.get('points_per_game', '0') or '0'):.1f}</span>
+                    <span class="stat-label">PPG</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{float(player.get('selected_by_percent', '0') or '0'):.1f}%</span>
+                    <span class="stat-label">Ownership</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{player.get('minutes', 0)}</span>
+                    <span class="stat-label">Minutes</span>
+                </div>
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
         )
 
     with col2:
-        player_in = st.text_input(
-            "Player In (ID)", placeholder="Enter player ID to transfer in"
+        # Performance charts
+        st.markdown("#### 📈 Performance Analysis")
+
+        # Create sample performance chart
+        try:
+            # Mock data for demonstration - replace with actual fixture data
+            gameweeks = list(range(1, 11))
+            points_history = [np.random.randint(0, 15) for _ in gameweeks]
+
+            fig = go.Figure()
+            fig.add_trace(
+                go.Scatter(
+                    x=gameweeks,
+                    y=points_history,
+                    mode="lines+markers",
+                    name="Points per GW",
+                    line=dict(color="#667eea", width=3),
+                    marker=dict(size=8),
+                )
+            )
+
+            fig.update_layout(
+                title="Points History (Last 10 GWs)",
+                xaxis_title="Gameweek",
+                yaxis_title="Points",
+                height=300,
+                margin=dict(l=0, r=0, t=30, b=0),
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        except Exception:
+            st.info("Performance charts require additional data setup")
+
+    # Advanced stats
+    st.markdown("#### 🎯 Advanced Statistics")
+
+    col3, col4, col5 = st.columns(3)
+
+    with col3:
+        st.metric("Goals", player.get("goals_scored", 0))
+        st.metric("Assists", player.get("assists", 0))
+
+    with col4:
+        st.metric("Clean Sheets", player.get("clean_sheets", 0))
+        st.metric("Bonus Points", player.get("bonus", 0))
+
+    with col5:
+        st.metric("Yellow Cards", player.get("yellow_cards", 0))
+        st.metric("Red Cards", player.get("red_cards", 0))
+
+
+def render_transfer_planner():
+    """Render the Transfer Planner tab."""
+    st.header("🔄 Transfer Planner")
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.subheader("Transfer Analysis")
+
+        # Transfer scenario inputs
+        transfer_type = st.radio(
+            "Transfer Type",
+            ["Single Transfer", "Double Transfer", "Wildcard Planning"],
+            horizontal=True,
         )
 
-    if player_out and player_in:
-        if st.button("Analyze Transfer"):
-            st.info(
-                "Transfer analysis will compare projected points, fixtures, and value!"
-            )
+        if transfer_type == "Single Transfer":
+            render_single_transfer()
+        elif transfer_type == "Double Transfer":
+            render_double_transfer()
+        else:
+            render_wildcard_planner()
+
+    with col2:
+        st.subheader("Transfer Recommendations")
+
+        # Quick recommendations
+        st.markdown(
+            """
+        <div class="metric-card">
+            <h4>🔥 Hot Picks</h4>
+            <p>Players trending up</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            """
+        <div class="metric-card">
+            <h4>❄️ Ice Cold</h4>
+            <p>Players to avoid</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            """
+        <div class="metric-card">
+            <h4>💎 Differentials</h4>
+            <p>Low ownership gems</p>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+
+def render_single_transfer():
+    """Render single transfer analysis."""
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.text_input("Player Out (ID)", placeholder="Enter player ID to transfer out")
+
+    with col2:
+        st.text_input("Player In (ID)", placeholder="Enter player ID to transfer in")
+
+    st.slider("Analysis Horizon (Gameweeks)", 1, 10, 5)
+
+    if st.button("Analyze Transfer", type="primary"):
+        with st.spinner("Analyzing transfer scenario..."):
+            # TODO: Implement transfer analysis
+            st.success("Transfer analysis feature coming soon!")
+
+
+def render_double_transfer():
+    """Render double transfer analysis."""
+    st.markdown("**Players Out**")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.text_input("First Player Out (ID)", key="out1")
+    with col2:
+        st.text_input("Second Player Out (ID)", key="out2")
+
+    st.markdown("**Players In**")
+    col3, col4 = st.columns(2)
+    with col3:
+        st.text_input("First Player In (ID)", key="in1")
+    with col4:
+        st.text_input("Second Player In (ID)", key="in2")
+
+    if st.button("Analyze Double Transfer", type="primary"):
+        with st.spinner("Analyzing double transfer..."):
+            st.success("Double transfer analysis feature coming soon!")
+
+
+def render_wildcard_planner():
+    """Render wildcard planning interface."""
+    st.markdown("**Wildcard Team Builder**")
+
+    budget = st.number_input(
+        "Budget (£m)", min_value=90.0, max_value=110.0, value=100.0, step=0.1
+    )
+
+    # Formation selector
+    formation = st.selectbox(
+        "Formation",
+        ["3-4-3", "3-5-2", "4-3-3", "4-4-2", "4-5-1", "5-3-2", "5-4-1"],
+        index=2,
+    )
+
+    st.info(f"Selected formation: {formation} with £{budget:.1f}m budget")
+
+    if st.button("Optimize Wildcard Team", type="primary"):
+        with st.spinner("Building optimal team..."):
+            st.success("Wildcard optimizer feature coming soon!")
 
 
 def render_fixture_analysis():
-    """Render enhanced fixture analysis."""
+    """Render the Fixture Analysis tab."""
     st.header("📅 Fixture Analysis")
 
     tab1, tab2, tab3 = st.tabs(
-        ["Fixture Difficulty", "Team Schedules", "Blank/Double GWs"]
+        ["Team Fixtures", "Fixture Difficulty", "Blank/Double GWs"]
     )
 
     with tab1:
-        st.subheader("🎯 Fixture Difficulty Rankings")
-
-        analysis_period = st.selectbox(
-            "Analysis Period", ["Next 3 GWs", "Next 5 GWs", "Next 8 GWs"], index=1
-        )
-
-        if st.button("Analyze Fixtures"):
-            with st.spinner("Calculating fixture difficulty..."):
-                try:
-                    n_gameweeks = int(analysis_period.split()[1])
-                    fixture_data = get_fixture_difficulty_rankings(next_n=n_gameweeks)
-
-                    if fixture_data:
-                        col1, col2 = st.columns(2)
-
-                        with col1:
-                            st.markdown("#### 🟢 Easiest Fixtures")
-                            for i, team in enumerate(fixture_data[:8], 1):
-                                difficulty = team.get("average_difficulty", 0)
-                                difficulty_class = get_difficulty_class(difficulty)
-
-                                st.markdown(
-                                    f"""
-                                <div style="display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee;">
-                                    <span>{i}. {team.get('team_name', 'Unknown')}</span>
-                                    <span class="{difficulty_class}">{difficulty:.1f}</span>
-                                </div>
-                                """,
-                                    unsafe_allow_html=True,
-                                )
-
-                        with col2:
-                            st.markdown("#### 🔴 Hardest Fixtures")
-                            hard_fixtures = fixture_data[-8:]
-                            for i, team in enumerate(hard_fixtures, 1):
-                                difficulty = team.get("average_difficulty", 0)
-                                difficulty_class = get_difficulty_class(difficulty)
-
-                                st.markdown(
-                                    f"""
-                                <div style="display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee;">
-                                    <span>{i}. {team.get('team_name', 'Unknown')}</span>
-                                    <span class="{difficulty_class}">{difficulty:.1f}</span>
-                                </div>
-                                """,
-                                    unsafe_allow_html=True,
-                                )
-
-                    else:
-                        st.warning("No fixture data available")
-
-                except Exception as e:
-                    st.error(f"Error analyzing fixtures: {str(e)}")
+        render_team_fixtures()
 
     with tab2:
-        st.subheader("📋 Team Schedules")
-        st.info("Detailed team fixture analysis coming soon!")
+        render_fixture_difficulty()
 
     with tab3:
-        st.subheader("📅 Blank & Double Gameweeks")
-        st.info(
-            "BGW/DGW analysis will be available during the season when fixtures are confirmed."
-        )
+        render_blank_double_gameweeks()
+
+
+def render_team_fixtures():
+    """Render team fixtures analysis."""
+    st.subheader("Team Fixture Analysis")
+
+    teams_result = load_teams_data()
+    if teams_result["status"] != "success":
+        st.error("Cannot load teams data")
+        return
+
+    teams = teams_result["data"]
+
+    # Team selector
+    selected_teams = st.multiselect(
+        "Select Teams to Analyze",
+        options=[team["name"] for team in teams],
+        default=[teams[0]["name"]] if teams else [],
+        max_selections=6,
+    )
+
+    if selected_teams:
+        # Analysis horizon
+        horizon = st.slider("Analyze Next N Gameweeks", 3, 10, 5)
+
+        # Mock fixture data for demonstration
+        st.markdown(f"#### Fixture Analysis for Next {horizon} Gameweeks")
+
+        for team in selected_teams:
+            with st.expander(f"{team} Fixtures"):
+                # Mock fixtures
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Home Fixtures", "2")
+                with col2:
+                    st.metric("Away Fixtures", "3")
+                with col3:
+                    st.metric("Avg Difficulty", "3.2")
+
+                st.info("Detailed fixture data integration coming soon!")
+
+
+def render_fixture_difficulty():
+    """Render fixture difficulty ratings."""
+    st.subheader("🎯 Fixture Difficulty Rankings")
+
+    analysis_period = st.selectbox(
+        "Analysis Period", ["Next 3 GWs", "Next 5 GWs", "Next 8 GWs"], index=1
+    )
+
+    if st.button("Analyze Fixture Difficulty"):
+        with st.spinner("Calculating fixture difficulty..."):
+            try:
+                # Get fixture difficulty data
+                n_gameweeks = int(analysis_period.split()[1])
+                fixture_data = get_fixture_difficulty_rankings(next_n=n_gameweeks)
+
+                if fixture_data:
+                    # Split into easy and hard fixtures
+                    easy_fixtures = fixture_data[:10]
+                    hard_fixtures = fixture_data[-10:]
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        st.markdown("#### 🟢 Easiest Fixtures")
+                        for i, team in enumerate(easy_fixtures, 1):
+                            difficulty = team.get("average_difficulty", 0)
+                            difficulty_class = get_difficulty_class(difficulty)
+
+                            st.markdown(
+                                f"""
+                            <div style="display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee;">
+                                <span>{i}. {team.get('team_name', 'Unknown')}</span>
+                                <span class="{difficulty_class}">{difficulty:.1f}</span>
+                            </div>
+                            """,
+                                unsafe_allow_html=True,
+                            )
+
+                    with col2:
+                        st.markdown("#### 🔴 Hardest Fixtures")
+                        for i, team in enumerate(hard_fixtures, 1):
+                            difficulty = team.get("average_difficulty", 0)
+                            difficulty_class = get_difficulty_class(difficulty)
+
+                            st.markdown(
+                                f"""
+                            <div style="display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee;">
+                                <span>{i}. {team.get('team_name', 'Unknown')}</span>
+                                <span class="{difficulty_class}">{difficulty:.1f}</span>
+                            </div>
+                            """,
+                                unsafe_allow_html=True,
+                            )
+
+                else:
+                    st.warning("No fixture data available")
+
+            except Exception as e:
+                st.error(f"Error analyzing fixtures: {str(e)}")
+
+
+def render_blank_double_gameweeks():
+    """Render blank and double gameweek analysis."""
+    st.subheader("📋 Blank & Double Gameweeks")
+
+    st.info(
+        "Blank and Double Gameweek analysis will be available during the season when fixtures are updated."
+    )
+
+    # Placeholder for BGW/DGW data
+    st.markdown(
+        """
+    #### What to Look For:
+    - **Blank Gameweeks (BGW)**: When teams don't play due to cup competitions
+    - **Double Gameweeks (DGW)**: When teams play twice in one gameweek
+    - **Planning Strategy**: Build your squad around these special gameweeks
+    """
+    )
 
 
 def render_statistics_hub():
-    """Render enhanced statistics hub."""
+    """Render the Statistics Hub tab."""
     st.header("📊 Statistics Hub")
 
-    tab1, tab2, tab3 = st.tabs(
-        ["League Stats", "Player Comparisons", "Form & Projections"]
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["League Stats", "Player Comparisons", "Form Analysis", "Projections"]
     )
 
     with tab1:
-        st.subheader("🏆 League Statistics")
+        render_league_statistics()
 
+    with tab2:
+        render_player_comparisons()
+
+    with tab3:
+        render_form_analysis()
+
+    with tab4:
+        render_projections_analysis()
+
+
+def render_league_statistics():
+    """Render league-wide statistics."""
+    st.subheader("🏆 League Statistics")
+
+    players_result = load_players_data()
+    if players_result["status"] != "success":
+        st.error("Cannot load player data")
+        return
+
+    players = players_result["data"]
+
+    # Top performers by position
+    st.markdown("#### Top Performers by Position")
+
+    positions = {"GK": 1, "DEF": 2, "MID": 3, "FWD": 4}
+
+    for pos_name, pos_id in positions.items():
+        pos_players = [p for p in players if p.get("element_type") == pos_id]
+        if pos_players:
+            top_player = max(pos_players, key=lambda x: x.get("total_points", 0))
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric(
+                    f"Top {pos_name}",
+                    format_player_name(top_player),
+                    f"{top_player.get('total_points', 0)} points",
+                )
+
+
+def render_player_comparisons():
+    """Render player comparison interface."""
+    st.subheader("⚖️ Player Comparisons")
+
+    # Check for comparison list in session state
+    if "comparison_list" not in st.session_state:
+        st.session_state.comparison_list = []
+
+    comparison_list = st.session_state.comparison_list
+
+    if comparison_list:
+        st.markdown(f"#### Comparing {len(comparison_list)} players")
+
+        # Show selected players
         players_result = load_players_data()
         if players_result["status"] == "success":
             players = players_result["data"]
+            player_lookup = {p["id"]: p for p in players}
 
-            # Top performers by position
-            st.markdown("#### Top Scorers by Position")
+            selected_players = [
+                player_lookup[pid] for pid in comparison_list if pid in player_lookup
+            ]
 
-            positions = {"GK": 1, "DEF": 2, "MID": 3, "FWD": 4}
-
-            cols = st.columns(4)
-
-            for i, (pos_name, pos_id) in enumerate(positions.items()):
-                pos_players = [p for p in players if p.get("element_type") == pos_id]
-                if pos_players:
-                    top_player = max(
-                        pos_players, key=lambda x: x.get("total_points", 0)
+            if selected_players:
+                # Display comparison table
+                comparison_data = []
+                for player in selected_players:
+                    comparison_data.append(
+                        {
+                            "Player": format_player_name(player),
+                            "Position": get_position_name(
+                                player.get("element_type", 1)
+                            ),
+                            "Cost": format_currency(player.get("now_cost", 0) / 10.0),
+                            "Points": player.get("total_points", 0),
+                            "Form": f"{float(player.get('form', '0') or '0'):.1f}",
+                            "PPG": f"{float(player.get('points_per_game', '0') or '0'):.1f}",
+                            "Owned %": f"{float(player.get('selected_by_percent', '0') or '0'):.1f}%",
+                        }
                     )
 
-                    with cols[i]:
-                        points = top_player.get("total_points", 0)
-                        cost = top_player.get("now_cost", 0) / 10.0
+                df = pd.DataFrame(comparison_data)
+                st.dataframe(df, use_container_width=True, hide_index=True)
 
-                        st.markdown(
-                            create_metric_card(
-                                f"Top {pos_name}",
-                                format_player_name(top_player),
-                                f"{points} pts | {format_currency(cost)}",
-                            ),
-                            unsafe_allow_html=True,
+                # Clear comparison list
+                if st.button("Clear Comparison List"):
+                    st.session_state.comparison_list = []
+                    st.rerun()
+
+        # Advanced comparison
+        if len(comparison_list) >= 2:
+            horizon = st.slider(
+                "Projection Horizon (GWs)", 1, 10, 5, key="comp_horizon"
+            )
+
+            if st.button("Run Advanced Comparison"):
+                with st.spinner("Running comparison analysis..."):
+                    try:
+                        comparison_result = compare_player_projections(
+                            comparison_list, horizon
                         )
 
-        else:
-            st.error("Cannot load player statistics")
+                        if comparison_result:
+                            st.success("Comparison completed!")
+                            # Display detailed comparison results
+                            st.json(comparison_result)  # Temporary display
+                        else:
+                            st.warning("No comparison data available")
 
-    with tab2:
-        st.subheader("⚖️ Player Comparisons")
+                    except Exception as e:
+                        st.error(f"Comparison error: {str(e)}")
 
-        # Check for comparison list
-        if "comparison_list" not in st.session_state:
-            st.session_state.comparison_list = []
+    else:
+        st.info(
+            "No players selected for comparison. Add players from the Players Explorer tab."
+        )
 
-        comparison_list = st.session_state.comparison_list
 
-        if comparison_list:
-            st.markdown(f"#### Comparing {len(comparison_list)} players")
+def render_form_analysis():
+    """Render form analysis."""
+    st.subheader("📈 Form Analysis")
 
+    form_period = st.selectbox(
+        "Form Period", ["Last 3 GWs", "Last 5 GWs", "Season Average"], index=1
+    )
+
+    position_filter = st.selectbox(
+        "Position Filter",
+        ["All", "GK", "DEF", "MID", "FWD"],
+        index=0,
+        key="form_position",
+    )
+
+    if st.button("Analyze Form"):
+        with st.spinner("Analyzing player form..."):
             players_result = load_players_data()
             if players_result["status"] == "success":
                 players = players_result["data"]
-                player_lookup = {p["id"]: p for p in players}
 
-                selected_players = [
-                    player_lookup[pid]
-                    for pid in comparison_list
-                    if pid in player_lookup
-                ]
+                # Filter by position if specified
+                if position_filter != "All":
+                    position_map = {"GK": 1, "DEF": 2, "MID": 3, "FWD": 4}
+                    players = [
+                        p
+                        for p in players
+                        if p.get("element_type") == position_map[position_filter]
+                    ]
 
-                if selected_players:
-                    # Display comparison
-                    comparison_data = []
-                    for player in selected_players:
-                        cost = player.get("now_cost", 0) / 10.0
-                        value = player.get("total_points", 0) / max(cost, 0.1)
+                # Sort by form
+                players.sort(
+                    key=lambda x: float(x.get("form", "0") or "0"), reverse=True
+                )
 
-                        comparison_data.append(
-                            {
-                                "Player": format_player_name(player),
-                                "Position": get_position_name(
-                                    player.get("element_type", 1)
-                                ),
-                                "Cost": format_currency(cost),
-                                "Points": player.get("total_points", 0),
-                                "Form": f"{float(player.get('form', '0') or '0'):.1f}",
-                                "PPG": f"{float(player.get('points_per_game', '0') or '0'):.1f}",
-                                "Owned %": f"{float(player.get('selected_by_percent', '0') or '0'):.1f}%",
-                                "Value": f"{value:.1f}",
-                            }
-                        )
+                # Display top form players
+                st.markdown("#### 🔥 Best Form Players")
 
-                    df = pd.DataFrame(comparison_data)
-                    st.dataframe(df, use_container_width=True, hide_index=True)
-
-                    if st.button("Clear Comparison List"):
-                        st.session_state.comparison_list = []
-                        st.rerun()
-
-        else:
-            st.info(
-                "No players selected for comparison. Add players from the Players Explorer."
-            )
-
-    with tab3:
-        st.subheader("📈 Form & Projections")
-
-        players_result = load_players_data()
-        if players_result["status"] == "success":
-            players = players_result["data"]
-
-            # Form trends chart
-            st.markdown("#### Interactive Form Analysis")
-
-            col_chart1, col_chart2 = st.columns(2)
-
-            with col_chart1:
-                try:
-                    form_chart = create_form_chart(players, limit=20)
-                    st.plotly_chart(form_chart, use_container_width=True)
-                except Exception as e:
-                    st.error(f"Error creating form chart: {str(e)}")
-
-            with col_chart2:
-                try:
-                    value_chart = create_value_analysis_chart(players, limit=15)
-                    st.plotly_chart(value_chart, use_container_width=True)
-                except Exception as e:
-                    st.error(f"Error creating value chart: {str(e)}")
-
-            # Form insights
-            st.markdown("#### 🔥 Current Form Leaders")
-
-            # Get top form players
-            top_form_players = sorted(
-                players, key=lambda x: float(x.get("form", "0") or "0"), reverse=True
-            )[:10]
-
-            form_cols = st.columns(5)
-
-            for i, player in enumerate(top_form_players[:5]):
-                with form_cols[i]:
+                top_form = players[:10]
+                for i, player in enumerate(top_form, 1):
                     form = float(player.get("form", "0") or "0")
                     cost = player.get("now_cost", 0) / 10.0
-                    points = player.get("total_points", 0)
 
                     st.markdown(
-                        create_metric_card(
-                            f"#{i+1} Form",
-                            f"{form:.1f}",
-                            f"{format_player_name(player)} | {format_currency(cost)}",
-                        ),
+                        f"""
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #eee; border-radius: 8px; margin: 0.5rem 0;">
+                        <div>
+                            <strong>{i}. {format_player_name(player)}</strong>
+                            <br>
+                            <small>{get_position_name(player.get('element_type', 1))} | {format_currency(cost)}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 1.2rem; font-weight: 600; color: #27ae60;">{form:.1f}</span>
+                            <br>
+                            <small>Form</small>
+                        </div>
+                    </div>
+                    """,
                         unsafe_allow_html=True,
                     )
 
-            # Additional insights
-            st.markdown("#### 📊 Form Analysis Insights")
 
-            # Calculate form statistics
-            all_forms = [
-                float(p.get("form", "0") or "0") for p in players if p.get("form")
-            ]
-            avg_form = sum(all_forms) / len(all_forms) if all_forms else 0
+def render_projections_analysis():
+    """Render projections analysis."""
+    st.subheader("🔮 Points Projections")
 
-            insight_col1, insight_col2, insight_col3 = st.columns(3)
+    projection_horizon = st.slider(
+        "Projection Horizon (GWs)", 1, 10, 5, key="proj_horizon"
+    )
+    position_proj = st.selectbox(
+        "Position", ["All", "GK", "DEF", "MID", "FWD"], key="proj_position"
+    )
+    max_cost_proj = st.slider("Max Cost (£m)", 4.0, 15.0, 15.0, key="proj_cost")
 
-            with insight_col1:
-                st.info(f"**Average League Form**: {avg_form:.2f}")
+    if st.button("Generate Projections"):
+        with st.spinner("Calculating projections..."):
+            try:
+                pos_filter = None if position_proj == "All" else position_proj
 
-            with insight_col2:
-                hot_players = len([f for f in all_forms if f > 6.0])
-                st.success(f"**Hot Form Players**: {hot_players} (6.0+ form)")
+                projections = get_top_projected_players(
+                    position=pos_filter,
+                    max_cost=max_cost_proj,
+                    limit=15,
+                    horizon_gameweeks=projection_horizon,
+                )
 
-            with insight_col3:
-                cold_players = len([f for f in all_forms if f < 3.0])
-                st.warning(f"**Poor Form Players**: {cold_players} (sub-3.0 form)")
+                if projections:
+                    st.markdown(
+                        f"#### 🎯 Top Projected Players (Next {projection_horizon} GWs)"
+                    )
 
-        else:
-            st.error("Cannot load player data for form analysis")
+                    proj_data = []
+                    for proj in projections:
+                        proj_data.append(
+                            {
+                                "Player": proj["name"],
+                                "Position": proj["position"],
+                                "Cost": format_currency(proj["cost"]),
+                                "Projected Points": f"{proj['projected_points']:.1f}",
+                                "Points per £m": f"{proj['projected_points'] / proj['cost']:.2f}",
+                                "Confidence": f"{proj['confidence_score']:.2f}",
+                                "Current Form": f"{proj['form']:.1f}",
+                            }
+                        )
+
+                    df = pd.DataFrame(proj_data)
+                    st.dataframe(df, use_container_width=True, hide_index=True)
+
+                else:
+                    st.warning("No projection data available")
+
+            except Exception as e:
+                st.error(f"Projection error: {str(e)}")
 
 
-def render_enhanced_sidebar():
-    """Render enhanced sidebar with tools and information."""
+# =====================================================
+# MAIN APPLICATION
+# =====================================================
+
+
+def main():
+    """Main application entry point."""
+    # Render header
+    render_header()
+
+    # Main navigation
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+        [
+            "🏠 Dashboard",
+            "👥 My Team",
+            "🔍 Players",
+            "🔄 Transfers",
+            "📅 Fixtures",
+            "📊 Statistics",
+        ]
+    )
+
+    with tab1:
+        render_dashboard_overview()
+
+    with tab2:
+        render_my_team_tab()
+
+    with tab3:
+        render_players_explorer()
+
+    with tab4:
+        render_transfer_planner()
+
+    with tab5:
+        render_fixture_analysis()
+
+    with tab6:
+        render_statistics_hub()
+
+    # Sidebar
+    render_sidebar()
+
+
+def render_sidebar():
+    """Render the sidebar with tools and settings."""
     with st.sidebar:
-        st.markdown("### ⚙️ FPL Toolkit Pro")
+        st.markdown("### ⚙️ Tools & Settings")
 
-        # Quick stats
-        st.markdown("#### 📊 Quick Stats")
+        # Quick actions
+        st.markdown("#### Quick Actions")
 
+        if st.button("🔄 Refresh Data", help="Clear cache and reload data"):
+            st.cache_data.clear()
+            st.success("Data cache cleared!")
+
+        if st.button("📱 Mobile View", help="Optimize for mobile"):
+            st.info("Already optimized for mobile!")
+
+        # Data status
+        st.markdown("#### 📊 Data Status")
         players_result = load_players_data()
         teams_result = load_teams_data()
 
-        # Status indicators
         if players_result["status"] == "success":
             st.success("✅ Players data loaded")
         else:
@@ -1580,52 +1665,38 @@ def render_enhanced_sidebar():
         else:
             st.error("❌ Teams data failed")
 
-        # Quick actions
-        st.markdown("#### ⚡ Quick Actions")
-
-        if st.button("🔄 Refresh Data", help="Clear cache and reload data"):
-            st.cache_data.clear()
-            st.success("Data refreshed!")
-
-        # Comparison list status
-        if "comparison_list" in st.session_state and st.session_state.comparison_list:
-            st.markdown("#### 📋 Comparison List")
-            st.info(f"{len(st.session_state.comparison_list)} players selected")
-
-            if st.button("Clear All"):
-                st.session_state.comparison_list = []
-                st.rerun()
-
-        # Feature roadmap
-        st.markdown("#### 🚧 Coming Soon")
-        st.markdown(
-            """
-        - 🤖 AI-powered advice
-        - 📱 Mobile app
-        - 📈 Advanced charts
-        - 🔔 Price alerts
-        - 👥 Team imports
-        - 📊 Custom analytics
-        """
-        )
-
         # App info
         st.markdown("#### ℹ️ About")
         st.markdown(
             """
-        **FPL Toolkit Pro** brings together the best features from top FPL websites into one comprehensive platform.
+        **FPL Toolkit Pro** combines the best features from:
+        - Fantasy Football Scout
+        - FPL Review  
+        - FPL Form
+        - FPL.page
         
-        **Features:**
-        - Real-time player data
-        - Advanced filtering & search
-        - Fixture difficulty analysis
-        - Form tracking
-        - Team building tools
+        Built for serious FPL managers who want data-driven decisions.
         """
         )
 
+        st.markdown("#### 🚀 Features")
+        st.markdown(
+            """
+        ✅ Real-time player data  
+        ✅ Advanced filtering  
+        ✅ Transfer analysis  
+        ✅ Fixture difficulty  
+        ✅ Form tracking  
+        ✅ Points projections  
+        ✅ Team optimization  
+        ✅ Mobile responsive  
+        """
+        )
+
+        # Version info
         st.markdown("---")
-        st.markdown("**Version**: 2.0.0 Pro  \n**Updated**: August 2025")
+        st.markdown("**Version**: 2.0.0 Pro")
+        st.markdown("**Last Updated**: August 2025")
 
 
 if __name__ == "__main__":

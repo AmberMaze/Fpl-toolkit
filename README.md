@@ -411,11 +411,27 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - **Accuracy**: Projections are estimates and should not be the sole basis for decisions
 - **Liability**: No guarantee of accuracy or performance
 
-## Support
+## Support & Documentation
 
-- 📚 **Documentation**: See `/docs` folder for detailed guides
-- 🐛 **Issues**: Report bugs on GitHub Issues
-- 💬 **Discussions**: Join GitHub Discussions for questions
+### 📖 Complete Documentation
+Comprehensive guides available in the `Documentation/` directory:
+
+- **[🚀 Quick Start](Documentation/Quick-Start.md)** - Get up and running in minutes
+- **[⚙️ Setup & Installation](Documentation/Setup-Installation.md)** - Complete setup guide
+- **[🎯 Features Overview](Documentation/Features.md)** - All available functionality
+- **[🛠️ API Reference](Documentation/API-Reference.md)** - REST API documentation
+- **[💻 CLI Reference](Documentation/CLI-Reference.md)** - Command-line tools
+- **[🏗️ Technical Stack](Documentation/Technical-Stack.md)** - Architecture overview
+- **[🚀 Deployment Guide](Documentation/Deployment.md)** - Production deployment
+- **[📋 Best Practices](Documentation/Best-Practices.md)** - Development guidelines
+- **[🔧 Troubleshooting](Documentation/Troubleshooting.md)** - Common issues & solutions
+
+> **📋 Documentation Index**: [Documentation/README.md](Documentation/README.md)
+
+### 🆘 Getting Help
+- 🐛 **Issues**: Report bugs on [GitHub Issues](https://github.com/AmberMaze/Fpl-toolkit/issues)
+- 💬 **Discussions**: Ask questions in [GitHub Discussions](https://github.com/AmberMaze/Fpl-toolkit/discussions)
+- 📧 **Contact**: Create an issue for direct support
 
 ---
 
